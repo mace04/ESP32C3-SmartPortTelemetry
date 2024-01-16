@@ -41,7 +41,6 @@ class Sensors
     float baselinePressure;
     SFE_BMP180 bmp180;              // BMP180 sensor
     int voltageTestValue = 0;
-    float vdRatio;
     unsigned long timer;
     float current;
     float consumption;
