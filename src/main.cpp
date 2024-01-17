@@ -123,7 +123,7 @@ void setup() {
   Serial.println("Initialise Completed...");
 }
 
-void loop() {
+void loop() { //TODO Serial feedback for loop function running time
   if(wifiConnected)
   {
     ArduinoOTA.handle();

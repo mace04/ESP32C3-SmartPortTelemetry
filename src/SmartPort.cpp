@@ -198,7 +198,7 @@ void SmartPort::SetSensorValue(uint16_t sensorId, uint32_t value)
   }
 }
 
-void SmartPort::Hanlde()
+void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
 {
   // ReadSensors();
   if (smartPort->available() > 0)

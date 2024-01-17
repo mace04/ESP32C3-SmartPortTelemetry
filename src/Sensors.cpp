@@ -150,7 +150,7 @@ double Sensors::GetPressure()
 
 int curretTestValue = 0;
 float previousCurrentValue = 0;
-float Sensors::GetCurrent() {
+float Sensors::GetCurrent() { //TODO  Serial feedback for pin value and calculated current value
 	int i;
 	unsigned long val = 0;
 	float retval;
@@ -186,7 +186,7 @@ float Sensors::GetCurrent() {
 	return retval;
 }
 
-float Sensors::GetVoltage(int pin) {
+float Sensors::GetVoltage(int pin) { //TODO  Serial feedback for pin value and calculated voltage value
 	int i;
 	unsigned long val = 0;
 	float vCalibration;
@@ -226,7 +226,7 @@ float Sensors::GetVoltage(int pin) {
 	return retval;
 }
 
-void Sensors::SetPowerConsumption()
+void Sensors::SetPowerConsumption() //TODO  Serial feedback calculated consumption value
 {
     float time = (float)(millis() - timer) / 1000.0;
     // consumption += current * 1000.00 * (float)time / 3600.00;
