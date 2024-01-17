@@ -123,7 +123,9 @@ void setup() {
   Serial.println("Initialise Completed...");
 }
 
-void loop() { //TODO Serial feedback for loop function running time
+long int timer;
+void loop() { 
+  timer = millis();
   if(wifiConnected)
   {
     ArduinoOTA.handle();
@@ -132,6 +134,8 @@ void loop() { //TODO Serial feedback for loop function running time
 
   // put your main code here, to run repeatedly:
   smartPort.Hanlde();
+  Serial.print(">processingTime:");
+  Serial.println(millis() - timer);
 }
 
 void handle_OnGet() {
