@@ -142,6 +142,7 @@ void handle_OnGet() {
 }
 
 void handle_OnPost() {
+  //TODO Set ALT settings
   SensorSettings sensorSettings;
 
   sensorSettings.EnableSensorCURR = server.arg("isSensorCurr") == "checked" ? true : false;
@@ -170,6 +171,7 @@ void handle_NotFound(){
 
 String SendHTML()
 {
+  //TODO Display ALT sensor and settings
   char ptr1[8];
   char ptr2[6];
   SensorSettings sensors = Settings::GetSensorSettings();

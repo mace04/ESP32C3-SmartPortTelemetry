@@ -12,8 +12,10 @@ SmartPortSettings Settings::GetSmartPortSettings()
     return settings;
 }
 
-SensorSettings Settings::GetSensorSettings()
+SensorSettings Settings::GetSensorSettings() 
 {
+    //TODO Add ALT sensor
+    //TODO Add calibration settings for ALT sensor
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
@@ -33,6 +35,8 @@ SensorSettings Settings::GetSensorSettings()
 
 void Settings::SetSensorSettings(SensorSettings settings)
 {
+    //TODO Enable/disable ALT sensor
+    //TODO Set calibration settings for ALT sensor
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, false))
         Serial.println("Error initialising NVS for Sensors");

@@ -73,7 +73,7 @@ float Sensors::ReadSensor(uint16_t sensorId)
 		case SENSOR_A4:
 			return GetVoltage(PIN_A4);
 #endif			
-		case SENSOR_ALT:
+		case SENSOR_ALT: //TODO Read ALT sensor
 			return -1;
 		case SENSOR_GPS_LONG_LATI:
 			return -1;

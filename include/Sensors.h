@@ -58,6 +58,7 @@ class Sensors
     bool isSensorSpd = false;
 
     double GetPressure();
+    //TODO Create method to read ALT sensor
     float GetCurrent();
     float GetVoltage(int pin);
     float GetPowerConsumption();
