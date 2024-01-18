@@ -231,9 +231,16 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
 // Serial.printf("%09u SensorId: 0x83   GPSALT: %05i   GPSSPD: %05i   ALT: %05i\n", millis(), gpsAltData.value.longValue, gpsSpeedData.value.longValue, altData.value.longValue);
           break;
         case 0x45:  // Physical ID 6 - SP2UART(Host)
-          // if (loop % 3 == 1 && a3Data.isRegistered) this->SendData(a3Data);
-          // if (loop % 3 == 2 && a4Data.isRegistered) this->SendData(a4Data);
-// Serial.printf("%09u SensorId: 0x45   A3: %05i   A4: %05i\n", millis(), a3Data.value.longValue, a4Data.value.longValue);
+          if (millis() - a3Data.lastSent > settings.RefreshRate && a3Data.isRegistered) 
+          {
+            SetSensorValue(FRSKY_VALUE_TYPE_A3, sensors->ReadSensor(SENSOR_A3));
+            this->SendData(a3Data);
+          }
+          if (millis() - a4Data.lastSent > settings.RefreshRate && a4Data.isRegistered) 
+          {
+            SetSensorValue(FRSKY_VALUE_TYPE_A4, sensors->ReadSensor(SENSOR_A4));
+            this->SendData(a4Data);
+          }
           break;
         case 0x98:  // Physical ID 25 - Fuel / Power consumption
           if (millis() - fuelData.lastSent > settings.RefreshRate && fuelData.isRegistered) 
