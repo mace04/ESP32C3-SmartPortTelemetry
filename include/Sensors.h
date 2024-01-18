@@ -62,7 +62,7 @@ class Sensors
     float GetCurrent();
     float GetVoltage(int pin);
     float GetPowerConsumption();
-    void SetPowerConsumption();
+    void SetPowerConsumption(float curr);
 
 };
 

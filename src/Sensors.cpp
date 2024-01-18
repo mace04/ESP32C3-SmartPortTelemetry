@@ -169,7 +169,7 @@ float Sensors::GetCurrent() {
 	else {
 		retval = -1;
 	}
-	this->SetPowerConsumption();
+	this->SetPowerConsumption(retval);
 	return retval;
 }
 
@@ -212,11 +212,11 @@ float Sensors::GetVoltage(int pin) {
 	return retval;
 }
 
-void Sensors::SetPowerConsumption()
+void Sensors::SetPowerConsumption(float curr)
 {
     float time = (float)(millis() - timer) / 1000.0;
     // consumption += current * 1000.00 * (float)time / 3600.00;
-    consumption += (float) current * CALIBRATION_FUEL / (time * 1000.00 / 60.00);
+    consumption += (float) curr * CALIBRATION_FUEL / (time * 1000.00 / 60.00);
     timer = millis();
 }
 
