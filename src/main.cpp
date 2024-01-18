@@ -1,3 +1,20 @@
+/*
+Custom Smartport sensor to provide telementry for:
+  * VFAS
+  * CURR
+  * ALT
+  * A3
+  * A4
+
+Reference to other projects and information:
+  * https://www.rcgroups.com/forums/showthread.php?2245978-FrSky-S-Port-telemetry-library-easy-to-use-and-configurable 
+  * https://www.rcgroups.com/forums/showthread.php?2465555-FrSky-(old)-telemetry-library-easy-to-use-and-configurable 
+  * https://www.rcgroups.com/forums/showthread.php?2245978-FrSky-S-Port-telemetry-library-easy-to-use-and-configurable
+  * https://code.google.com/archive/p/telemetry-convert/wikis/FrSkySPortProtocol.wiki
+  * https://github.com/jcheger/frsky-arduino/blob/master/FrskySP/examples/FrskySP_sensor_demo/FrskySP_sensor_demo.ino
+  * https://github.com/RealTadango/FrSky/tree/master/examples
+*/
+
 #include <Arduino.h>
 #include <SmartPort.h>
 #include <WiFi.h>
