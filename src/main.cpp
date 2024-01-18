@@ -13,6 +13,7 @@ Reference to other projects and information:
   * https://code.google.com/archive/p/telemetry-convert/wikis/FrSkySPortProtocol.wiki
   * https://github.com/jcheger/frsky-arduino/blob/master/FrskySP/examples/FrskySP_sensor_demo/FrskySP_sensor_demo.ino
   * https://github.com/RealTadango/FrSky/tree/master/examples
+  * https://wiki.seeedstudio.com/xiaoesp32c3-flash-storage/
 */
 
 #include <Arduino.h>
