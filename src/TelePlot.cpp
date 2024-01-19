@@ -1,65 +1,72 @@
 #include <TelePlot.h>
 
-TelePlot::TelePlot(HardwareSerial serial)
+void TelePlot::Plot(HardwareSerial serial, String label, int value)
 {
-    hwSerial = serial;
-    serialType = SerialType::HWSerial;
+    serial.print(">" + label);
+    serial.println(value);
 }
-TelePlot::TelePlot(BluetoothSerial serial)
+void TelePlot::Plot(HardwareSerial serial, String label, long value)
 {
-    btSerial = serial;
-    serialType = SerialType::BTSerial;
-}
-
-void TelePlot::PrintLabel(String label)
-{
-    switch(serialType)
-    {
-        case SerialType::HWSerial:
-            hwSerial.print(">" + label);
-            break;
-        case SerialType::BTSerial:
-            btSerial.print(">" + label);
-            break;
-        default:
-            Serial.print(">" + label);
-    }
+    serial.print(">" + label);
+    serial.println(value);
 }
 
-//TODO Create private method to print the value to the proper serial
-
-
-void TelePlot::Plot(String name, int value)
+void TelePlot::Plot(HardwareSerial serial, String label, double value)
 {
-    //TODO Cal private methods to print to the proper Serial
-    this->PrintLabel(name);
+    serial.print(">" + label);
+    serial.println(value);
 }
 
-void TelePlot::Plot(String name, double value)
+void TelePlot::Plot(HardwareSerial serial, String label, float value)
 {
-    //TODO Cal private methods to print to the proper Serial
-}
-void TelePlot::Plot(String name, float value)
-{
-    //TODO Cal private methods to print to the proper Serial
-
+    serial.print(">" + label);
+    serial.println(value);
 }
 
-void TelePlot::Plot(String name, long value)
+void TelePlot::Plot(HardwareSerial serial, String label, unsigned int value)
 {
-    //TODO Cal private methods to print to the proper Serial
-
+    serial.print(">" + label);
+    serial.println(value);
 }
 
-void TelePlot::Plot(String name, unsigned int value)
+void TelePlot::Plot(HardwareSerial serial, String label, unsigned long value)
 {
-    //TODO Cal private methods to print to the proper Serial
-
+    serial.print(">" + label);
+    serial.println(value);
 }
 
-void TelePlot::Plot(String name, unsigned long value)     
+void TelePlot::Plot(BluetoothSerial serial, String label, int value)
 {
-    //TODO Cal private methods to print to the proper Serial
+    serial.print(">" + label);
+    serial.println(value);
+}
+void TelePlot::Plot(BluetoothSerial serial, String label, long value)
+{
+    serial.print(">" + label);
+    serial.println(value);
+}
 
+void TelePlot::Plot(BluetoothSerial serial, String label, double value)
+{
+    serial.print(">" + label);
+    serial.println(value);
+}
+
+void TelePlot::Plot(BluetoothSerial serial, String label, float value)
+{
+    serial.print(">" + label);
+    serial.println(value);
+}
+
+void TelePlot::Plot(BluetoothSerial serial, String label, unsigned int value)
+{
+    serial.print(">" + label);
+    serial.println(value);
+}
+
+void TelePlot::Plot(BluetoothSerial serial, String label, unsigned long value)
+{
+    serial.print(">" + label);
+    serial.println(value);
 }
 
