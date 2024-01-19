@@ -19,5 +19,11 @@ class TelePlot
         static void Plot(BluetoothSerial serial, String label, float value);
         static void Plot(BluetoothSerial serial, String label, unsigned int value);
         static void Plot(BluetoothSerial serial, String label, unsigned long value);      
+        static void Plot(String label, int value);
+        static void Plot(String label, long value);
+        static void Plot(String label, double value);
+        static void Plot(String label, float value);
+        static void Plot(String label, unsigned int value);
+        static void Plot(String label, unsigned long value);
 };
 #endif
