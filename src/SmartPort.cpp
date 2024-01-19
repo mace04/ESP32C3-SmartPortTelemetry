@@ -135,6 +135,7 @@ bool SmartPort::IsRegistered(uint16_t sensorId)
 
 void SmartPort::ReadSensors()
 {
+  //TODO Read ALT sensor
   if (IsRegistered(FRSKY_VALUE_TYPE_CURR))
     SetSensorValue(FRSKY_VALUE_TYPE_CURR, sensors->ReadSensor(SENSOR_CURR) * 100);
   if (IsRegistered(FRSKY_VALUE_TYPE_VFAS))
@@ -227,6 +228,7 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
         case 0x83:  // Physical ID 4 - GPS / altimeter (normal precision)
           // if (loop % 3 == 0 && gpsAltData.isRegistered) this->SendData(gpsAltData);
           // if (loop % 3 == 1 && gpsSpeedData.isRegistered) this->SendData(gpsSpeedData);
+          // TODO Send ALT data to Smartport receiver
           // if (loop % 3 == 2 && altData.isRegistered) this->SendData(altData);
 // Serial.printf("%09u SensorId: 0x83   GPSALT: %05i   GPSSPD: %05i   ALT: %05i\n", millis(), gpsAltData.value.longValue, gpsSpeedData.value.longValue, altData.value.longValue);
           break;

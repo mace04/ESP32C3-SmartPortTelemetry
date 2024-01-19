@@ -2,7 +2,6 @@
 
 Sensors::Sensors()
 {
-	vdRatio = (float) settings.VSensorR2 / (float) (settings.VSensorR1 + settings.VSensorR2);
 	consumption = 0;
 }
 
@@ -74,7 +73,7 @@ float Sensors::ReadSensor(uint16_t sensorId)
 		case SENSOR_A4:
 			return GetVoltage(PIN_A4);
 #endif			
-		case SENSOR_ALT:
+		case SENSOR_ALT: //TODO Read ALT sensor
 			return -1;
 		case SENSOR_GPS_LONG_LATI:
 			return -1;
@@ -165,31 +164,19 @@ float Sensors::GetCurrent() { //TODO  Serial feedback for pin value and calculat
 			curretTestValue = 0;
 		val = SAMPLE_RATES * curretTestValue++;
 #endif // _TEST_VALUES_
-
-		int temp = (val / SAMPLE_RATES) * MAX_CURRENT / 750.00;
-		// retval = temp * 10;
-		retval = (val / SAMPLE_RATES) / 100;
-
-		// if (isOverThreshhold(retval, previousCurrentValue, CURRENT_PRECISSION) && millis() > currInterval + TELEMETRY_REFRESH_RATE) {
-		// 	data.value = retval;
-		// 	previousCurrentValue = retval;
-		// 	currInterval = millis();
-		// }
-		// else {
-		// 	data.value = previousCurrentValue;
-		// }
+		retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 1000.00;
 	}
 	else {
 		retval = -1;
 	}
-	this->SetPowerConsumption();
+	this->SetPowerConsumption(retval);
 	return retval;
 }
 
 float Sensors::GetVoltage(int pin) { //TODO  Serial feedback for pin value and calculated voltage value
 	int i;
 	unsigned long val = 0;
-	float vCalibration;
+	float vpp;
 
 	for (i = 0; i < SAMPLE_RATES; i++) {
 		val += analogRead(pin);
@@ -204,33 +191,32 @@ float Sensors::GetVoltage(int pin) { //TODO  Serial feedback for pin value and c
 
 	switch (pin) {
 	case PIN_VFAS:
-		vCalibration = CALIBRATION_VFAS;
+		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		// Debug("PIN " + String(PIN_VFAS) + ": " + String(val / SAMPLE_RATES));
 		break;
 	case PIN_A3:
-		vCalibration = CALIBRATION_A3;
+		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		// Debug("PIN " + String(PIN_A3) + ": " + String(val / SAMPLE_RATES));
 		break;
 	#ifndef ARDUINO_XIAO_ESP32C3
 	case PIN_A4:
-		vCalibration = CALIBRATION_A4;
+		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		// Debug("PIN " + String(PIN_A4) + ": " + String(val / SAMPLE_RATES));
 		break;
 	#endif
 	default:
-		vCalibration = CALIBRATION_VFAS;
+		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		break;
 	}
-	// float retval = ((val / SAMPLE_RATES) * 100 / vdRatio) + vCalibration;
-	float retval = ((float)val / (float) SAMPLE_RATES) / 10 ;
+	float retval = ((float)val / (float) SAMPLE_RATES) * vpp / (1000.00 * 10.00) ;
 	return retval;
 }
 
-void Sensors::SetPowerConsumption() //TODO  Serial feedback calculated consumption value
+void Sensors::SetPowerConsumption(float curr)  //TODO  Serial feedback calculated consumption value
 {
     float time = (float)(millis() - timer) / 1000.0;
     // consumption += current * 1000.00 * (float)time / 3600.00;
-    consumption += (float) current * CALIBRATION_FUEL / (time * 1000.00 / 60.00);
+    consumption += (float) curr * CALIBRATION_FUEL / (time * 1000.00 / 60.00);
     timer = millis();
 }
 

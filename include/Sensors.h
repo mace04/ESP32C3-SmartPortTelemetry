@@ -41,7 +41,6 @@ class Sensors
     float baselinePressure;
     SFE_BMP180 bmp180;              // BMP180 sensor
     int voltageTestValue = 0;
-    float vdRatio;
     unsigned long timer;
     float current;
     float consumption;
@@ -59,10 +58,11 @@ class Sensors
     bool isSensorSpd = false;
 
     double GetPressure();
+    //TODO Create method to read ALT sensor
     float GetCurrent();
     float GetVoltage(int pin);
     float GetPowerConsumption();
-    void SetPowerConsumption();
+    void SetPowerConsumption(float curr);
 
 };
 

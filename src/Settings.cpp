@@ -12,8 +12,10 @@ SmartPortSettings Settings::GetSmartPortSettings()
     return settings;
 }
 
-SensorSettings Settings::GetSensorSettings()
+SensorSettings Settings::GetSensorSettings() 
 {
+    //TODO Add ALT sensor
+    //TODO Add calibration settings for ALT sensor
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
@@ -24,21 +26,17 @@ SensorSettings Settings::GetSensorSettings()
     settings.EnableSensorA3 = settingsPreferences.getBool("enableA3", false);
     settings.EnableSensorA4 = settingsPreferences.getBool("enableA4", false);
     settings.EnableSensorFuel = settingsPreferences.getBool("enableFuel", false);
-    settings.VSensorR1 = settingsPreferences.getInt("vSensorR1", R1);
-    settings.VSensorR2 = settingsPreferences.getInt("vSensorR2", R2);
-    settings.MaxCurrent = settingsPreferences.getInt("maxCurrent", MAX_CURRENT);
-    settings.CurrentPrecision = settingsPreferences.getDouble("currPrecision", CURRENT_PRECISSION);
-    settings.CalibrationCURR = settingsPreferences.getDouble("calibrationCURR", CALIBRATION_CURR);
-    settings.CalibrationVFAS = settingsPreferences.getDouble("calibrationVFAS", CALIBRATION_VFAS);
-    settings.CalibrationA3 = settingsPreferences.getDouble("calibrationA3", CALIBRATION_A3);
-    settings.CalibrationA4 = settingsPreferences.getDouble("calibrationA4", CALIBRATION_A4);
-    settings.CalibrationFuel = settingsPreferences.getDouble("calibrationFuel", CALIBRATION_FUEL);
+    settings.AmpsPerPoint = settingsPreferences.getDouble("mapp", MILLIAMPS_PER_POINT);
+    settings.VoltsPerPoint = settingsPreferences.getDouble("mvpp", MILLIVOLTS_PER_POINT);
+
     settingsPreferences.end();
     return settings;
 }
 
 void Settings::SetSensorSettings(SensorSettings settings)
 {
+    //TODO Enable/disable ALT sensor
+    //TODO Set calibration settings for ALT sensor
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, false))
         Serial.println("Error initialising NVS for Sensors");
@@ -48,18 +46,11 @@ void Settings::SetSensorSettings(SensorSettings settings)
     settingsPreferences.putBool("enableA3", settings.EnableSensorA3);
     settingsPreferences.putBool("enableA4", settings.EnableSensorA4);
     settingsPreferences.putBool("enableFuel", settings.EnableSensorFuel);
-    settingsPreferences.putInt("vSensorR1", settings.VSensorR1);
-    settingsPreferences.putInt("vSensorR2", settings.VSensorR2);
-    settingsPreferences.putInt("maxCurrent", settings.MaxCurrent);
-    settingsPreferences.putDouble("currPrecision", settings.CurrentPrecision);
-    settingsPreferences.putDouble("calibrationCURR", settings.CalibrationCURR);
-    settingsPreferences.putDouble("calibrationVFAS", settings.CalibrationVFAS);
-    settingsPreferences.putDouble("calibrationA3", settings.CalibrationA3);
-    settingsPreferences.putDouble("calibrationA4", settings.CalibrationA4);
-    settingsPreferences.putDouble("calibrationFuel", settings.CalibrationFuel);  
+    settingsPreferences.putDouble("mapp", settings.AmpsPerPoint);
+    settingsPreferences.putDouble("mvpp", settings.VoltsPerPoint);
     
     settingsPreferences.end();
-  
+
 }
 
 WiFiSettings Settings::GetWiFiSettings()
