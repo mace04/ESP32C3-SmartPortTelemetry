@@ -15,7 +15,7 @@ void Sensors::RegisterSensors()
 {
 	isSensorVfas = settings.EnableSensorVFAS; //(PIN_VFAS) > 0;
 	isSensorCurr = settings.EnableSensorCURR; //analogRead(PIN_CURR) > 0;
-	isSensorFuel = isSensorCurr;
+	isSensorFuel = isSensorCurr && settings.EnableSensorFuel;
 	isSensorA3 = settings.EnableSensorA3; //analogRead(PIN_A3) > 0;
 	#ifndef ARDUINO_XIAO_ESP32C3
 		isSensorA4 = settings.EnableSensorA4; //analogRead(PIN_A4) > 0;
