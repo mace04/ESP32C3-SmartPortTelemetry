@@ -5,6 +5,7 @@
 #include <SFE_BMP180.h>
 #include <Wire.h>
 #include <Settings.h>
+#include <TelePlot.h>
 
 #define PIN_CURR          A0	//Current Sensor - Range 0-3.3V
 #define PIN_VFAS          A1	//VFAS Sensor - Range 0-3.3V - Battery Range 0-18V

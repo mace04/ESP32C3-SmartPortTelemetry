@@ -149,7 +149,7 @@ double Sensors::GetPressure()
 
 int curretTestValue = 0;
 float previousCurrentValue = 0;
-float Sensors::GetCurrent() { //TODO  Serial feedback for pin value and calculated current value
+float Sensors::GetCurrent() { 
 	int i;
 	unsigned long val = 0;
 	float retval;
@@ -159,12 +159,14 @@ float Sensors::GetCurrent() { //TODO  Serial feedback for pin value and calculat
 			val += analogRead(PIN_CURR);// *MAX_CURRENT * 10.00 / 750.00;
 			delayMicroseconds(SAMPLE_DELAY_MS);
 		}
+		TelePlot::Plot("PIN_CURR(A0):", (int) (val/SAMPLE_RATES));
 #ifdef _TEST_VALUES_
 		if (curretTestValue == 1023)
 			curretTestValue = 0;
 		val = SAMPLE_RATES * curretTestValue++;
 #endif // _TEST_VALUES_
 		retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 1000.00;
+		TelePlot::Plot("CURR:", retval);
 	}
 	else {
 		retval = -1;
@@ -173,7 +175,7 @@ float Sensors::GetCurrent() { //TODO  Serial feedback for pin value and calculat
 	return retval;
 }
 
-float Sensors::GetVoltage(int pin) { //TODO  Serial feedback for pin value and calculated voltage value
+float Sensors::GetVoltage(int pin) { 
 	int i;
 	unsigned long val = 0;
 	float vpp;
@@ -189,34 +191,47 @@ float Sensors::GetVoltage(int pin) { //TODO  Serial feedback for pin value and c
 	val = SAMPLE_RATES * voltageTestValue++;
 #endif
 
+	String sensorName, pinName;
 	switch (pin) {
 	case PIN_VFAS:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		// Debug("PIN " + String(PIN_VFAS) + ": " + String(val / SAMPLE_RATES));
+		sensorName = "VFAS:";
+		pinName = "PIN_VFAS(A1):";
 		break;
 	case PIN_A3:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		// Debug("PIN " + String(PIN_A3) + ": " + String(val / SAMPLE_RATES));
+		sensorName = "A3:";
+		pinName = "PIN_A3(A2):";
 		break;
 	#ifndef ARDUINO_XIAO_ESP32C3
 	case PIN_A4:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		// Debug("PIN " + String(PIN_A4) + ": " + String(val / SAMPLE_RATES));
+		sensorName = "A4:";
+		pinName = "PIN_A4(A3):";
 		break;
 	#endif
 	default:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
+		sensorName = "VFAS:";
+		pinName = "PIN_VFAS(A1):";
 		break;
 	}
+	TelePlot::Plot(pinName, (int)(val/SAMPLE_RATES));
+
 	float retval = ((float)val / (float) SAMPLE_RATES) * vpp / (1000.00 * 10.00) ;
+	TelePlot::Plot(sensorName, retval);
 	return retval;
 }
 
-void Sensors::SetPowerConsumption(float curr)  //TODO  Serial feedback calculated consumption value
+void Sensors::SetPowerConsumption(float curr) 
 {
     float time = (float)(millis() - timer) / 1000.0;
     // consumption += current * 1000.00 * (float)time / 3600.00;
     consumption += (float) curr * CALIBRATION_FUEL / (time * 1000.00 / 60.00);
+	TelePlot::Plot("Fuel:", consumption);
     timer = millis();
 }
 
