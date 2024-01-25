@@ -52,7 +52,11 @@ class SmartPort
     private:
         unsigned long sensorPolling0x22Loop = 0;
         int softwarePin = -1;
+#ifdef ARDUINO_XIAO_ESP32C3
         HardwareSerial* smartPort = new HardwareSerial(1);
+#else
+        HardwareSerial* smartPort;
+#endif
         Sensors* sensors = new Sensors();
         SmartPortFrame altData;
         SmartPortFrame currData;

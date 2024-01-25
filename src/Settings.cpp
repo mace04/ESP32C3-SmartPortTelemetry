@@ -2,24 +2,30 @@
 
 SmartPortSettings Settings::GetSmartPortSettings()
 {
+    SmartPortSettings settings;
+ #ifdef ARDUINO_XIAO_ESP32C3
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SPORT_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
-    SmartPortSettings settings;
     settings.BaudRate = settingsPreferences.getInt("baudRate", SPORT_BAUD);
     settings.RefreshRate = settingsPreferences.getInt("refreshRate", SPORT_REFRESH_RATE);
     settingsPreferences.end();
+#else
+    settings.BaudRate = SPORT_BAUD;
+    settings.RefreshRate = SPORT_REFRESH_RATE;
+#endif
     return settings;
 }
 
 SensorSettings Settings::GetSensorSettings() 
 {
+    SensorSettings settings;
     //TODO Add ALT sensor
     //TODO Add calibration settings for ALT sensor
-    Preferences settingsPreferences;
+ #ifdef ARDUINO_XIAO_ESP32C3
+   Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
-    SensorSettings settings;
 
     settings.EnableSensorCURR = settingsPreferences.getBool("enableCURR", false);
     settings.EnableSensorVFAS = settingsPreferences.getBool("enableVFAS", false);
@@ -30,6 +36,15 @@ SensorSettings Settings::GetSensorSettings()
     settings.VoltsPerPoint = settingsPreferences.getDouble("mvpp", MILLIVOLTS_PER_POINT);
 
     settingsPreferences.end();
+#else
+    settings.EnableSensorCURR = true;
+    settings.EnableSensorVFAS = true;
+    settings.EnableSensorA3 = false;
+    settings.EnableSensorA4 = false;
+    settings.EnableSensorFuel = settings.EnableSensorCURR;
+    settings.AmpsPerPoint = MILLIAMPS_PER_POINT;
+    settings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
+#endif
     return settings;
 }
 
@@ -37,6 +52,8 @@ void Settings::SetSensorSettings(SensorSettings settings)
 {
     //TODO Enable/disable ALT sensor
     //TODO Set calibration settings for ALT sensor
+    //TODO Save sensor settings to EEPROM for Arduino
+ #ifdef ARDUINO_XIAO_ESP32C3
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, false))
         Serial.println("Error initialising NVS for Sensors");
@@ -50,9 +67,10 @@ void Settings::SetSensorSettings(SensorSettings settings)
     settingsPreferences.putDouble("mvpp", settings.VoltsPerPoint);
     
     settingsPreferences.end();
-
+#endif
 }
 
+#ifdef ARDUINO_XIAO_ESP32C3
 WiFiSettings Settings::GetWiFiSettings()
 {
     Preferences settingsPreferences;
@@ -80,3 +98,4 @@ void Settings::SetWiFiSettings(WiFiSettings settings)
     settingsPreferences.putString("hotspotPassword", settings.HotspotPassword);
     settingsPreferences.end();
 }
+#endif

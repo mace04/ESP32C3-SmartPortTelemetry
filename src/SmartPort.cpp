@@ -13,7 +13,11 @@ SmartPort::SmartPort()
 
 void SmartPort::Begin(uint8_t rxPin, uint8_t txPin, bool inverted){
   this->settings = Settings::GetSmartPortSettings();
+#ifdef ARDUINO_XIAO_ESP32C3
   smartPort->begin(settings.BaudRate, SERIAL_8N1, rxPin, txPin, inverted);
+#else
+  smartPort->begin(settings.BaudRate);
+#endif
   sensors->Begin();
   this->RegisterSensors();
 }

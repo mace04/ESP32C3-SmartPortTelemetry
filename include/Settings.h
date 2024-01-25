@@ -2,8 +2,12 @@
 #define SETTINGS_H
 
 #include <Arduino.h>
+#ifdef ARDUINO_XIAO_ESP32C3
 #include <nvs_flash.h>
 #include <Preferences.h>
+#else
+#include <EEPROM.h>
+#endif
 
 // Sensor Default Configuration
 #define R1                      47000.0000  // Replaced by VPP
@@ -26,9 +30,11 @@
 #define WIFI_SSID               "SKYPGFYX"
 #define WIFI_PASSWORD           "HDXvtRKbPi8i"
 
+#ifdef ARDUINO_XIAO_ESP32C3
 #define SPORT_STORAGE_SPACE     "sport-config"
 #define SENSORS_STORAGE_SPACE   "sensors-config"
 #define WIFI_STORAGE_SPACE      "wifi-config"
+#endif
 
 struct SmartPortSettings
 {
@@ -47,6 +53,7 @@ struct SensorSettings
     double VoltsPerPoint;   // In milliVolts
 };
 
+#ifdef ARDUINO_XIAO_ESP32C3
 struct WiFiSettings
 {
     String WiFiSSID;
@@ -54,6 +61,7 @@ struct WiFiSettings
     String HotspotSSID;
     String HotspotPassword;
 };
+#endif
 
 class Settings
 {
@@ -62,8 +70,10 @@ class Settings
         void SetSmartPortSettings(SmartPortSettings settings);
         static SensorSettings GetSensorSettings();
         static void SetSensorSettings(SensorSettings settings);
+#ifdef ARDUINO_XIAO_ESP32C3
         static WiFiSettings GetWiFiSettings();
         static void SetWiFiSettings(WiFiSettings settings);
+#endif
 };
 
 #endif

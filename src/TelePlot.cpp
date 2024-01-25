@@ -1,5 +1,6 @@
 #include <TelePlot.h>
 
+#ifdef ARDUINO_XIAO_ESP32C3
 void TelePlot::Plot(HardwareSerial serial, String label, int value)
 {
     serial.print(">" + label);
@@ -69,7 +70,7 @@ void TelePlot::Plot(BluetoothSerial serial, String label, unsigned long value)
     serial.print(">" + label);
     serial.println(value);
 }
-
+#endif
 void TelePlot::Plot(String label, int value)
 {
     Serial.print(">" + label);
