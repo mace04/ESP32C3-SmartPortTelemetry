@@ -38,8 +38,8 @@
 
 struct SmartPortSettings
 {
-    int BaudRate;
-    int RefreshRate;
+    unsigned int BaudRate;
+    unsigned int RefreshRate;
 };
 
 struct SensorSettings
