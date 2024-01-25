@@ -213,12 +213,8 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
   // ReadSensors();
   if (smartPort->available() > 0)
   {
-Serial.print("Data Available for read: ");
-Serial.println(smartPort->peek(),HEX);
     if (smartPort->read() == 0x7E){
       while(smartPort->available() == 0);
-Serial.print("Polling Sensor: ");
-Serial.println(smartPort->peek(),HEX);      
       int polledSensor = smartPort->read();
       switch(polledSensor)
       {
@@ -234,15 +230,12 @@ Serial.println(smartPort->peek(),HEX);
               SetSensorValue(FRSKY_VALUE_TYPE_VFAS, sensors->ReadSensor(SENSOR_VFAS) * 100);
               this->SendData(vfasData);
             }
-// Serial.printf("%03i    VFAS Registered: %i, header: %02x, sensorId: %04x value: %04i, crc: %02x\n", 
-//    sensorPolling0x22Loop, vfasData.isRegistered, vfasData.frameHeader, vfasData.sensorId, vfasData.value.longValue, vfasData.crc);
           break;
         case 0x83:  // Physical ID 4 - GPS / altimeter (normal precision)
           // if (loop % 3 == 0 && gpsAltData.isRegistered) this->SendData(gpsAltData);
           // if (loop % 3 == 1 && gpsSpeedData.isRegistered) this->SendData(gpsSpeedData);
           // TODO Send ALT data to Smartport receiver
           // if (loop % 3 == 2 && altData.isRegistered) this->SendData(altData);
-// Serial.printf("%09u SensorId: 0x83   GPSALT: %05i   GPSSPD: %05i   ALT: %05i\n", millis(), gpsAltData.value.longValue, gpsSpeedData.value.longValue, altData.value.longValue);
           break;
         case 0x45:  // Physical ID 6 - SP2UART(Host)
           if (millis() - a3Data.lastSent > settings.RefreshRate && a3Data.isRegistered) 
@@ -262,7 +255,6 @@ Serial.println(smartPort->peek(),HEX);
             SetSensorValue(FRSKY_VALUE_TYPE_FUEL, sensors->ReadSensor(SENSOR_FUEL));
             this->SendData(fuelData);
           }
-// Serial.printf("%09u SensorId: 0x98   FUEL: %05i\n", millis(), fuelData.value.longValue);
           break;
         default:
           break;
