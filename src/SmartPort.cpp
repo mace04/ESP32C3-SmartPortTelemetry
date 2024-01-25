@@ -12,11 +12,16 @@ SmartPort::SmartPort()
 }
 
 void SmartPort::Begin(uint8_t rxPin, uint8_t txPin, bool inverted){
-  this->settings = Settings::GetSmartPortSettings();
+  settings = Settings::GetSmartPortSettings();
 #ifdef ARDUINO_XIAO_ESP32C3
   smartPort->begin(settings.BaudRate, SERIAL_8N1, rxPin, txPin, inverted);
 #else
+  smartPort = new SoftwareSerial(13, 13, true); //Always inverted Serial comm for Soft Serial
+  if(rxPin == txPin) softwarePin = rxPin;
+  Serial.println(settings.BaudRate);
   smartPort->begin(settings.BaudRate);
+  pinMode(softwarePin, INPUT);
+  smartPort->listen();
 #endif
   sensors->Begin();
   this->RegisterSensors();
@@ -208,10 +213,13 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
   // ReadSensors();
   if (smartPort->available() > 0)
   {
+Serial.print("Data Available for read: ");
+Serial.println(smartPort->peek(),HEX);
     if (smartPort->read() == 0x7E){
       while(smartPort->available() == 0);
+Serial.print("Polling Sensor: ");
+Serial.println(smartPort->peek(),HEX);      
       int polledSensor = smartPort->read();
-// Serial.printf("Polling 0x7e 0x%02x\n", polledSensor);
       switch(polledSensor)
       {
         case 0x22:  // Physical ID 3 - FAS-40S current sensor
@@ -227,7 +235,7 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
               this->SendData(vfasData);
             }
 // Serial.printf("%03i    VFAS Registered: %i, header: %02x, sensorId: %04x value: %04i, crc: %02x\n", 
-//   sensorPolling0x22Loop, vfasData.isRegistered, vfasData.frameHeader, vfasData.sensorId, vfasData.value.longValue, vfasData.crc);
+//    sensorPolling0x22Loop, vfasData.isRegistered, vfasData.frameHeader, vfasData.sensorId, vfasData.value.longValue, vfasData.crc);
           break;
         case 0x83:  // Physical ID 4 - GPS / altimeter (normal precision)
           // if (loop % 3 == 0 && gpsAltData.isRegistered) this->SendData(gpsAltData);
@@ -299,11 +307,14 @@ byte SmartPort::GetChecksum(SmartPortFrame data)
 
 void SmartPort::SendData(SmartPortFrame& data)
 {
-  if(softwarePin > 0) {
-      // smartPort->stopListening();
-      pinMode(softwarePin, OUTPUT);
-      delay(1);
-  }  
+#ifndef ARDUINO_XIAO_ESP32C3
+  if(softwarePin > 0)
+  {
+    smartPort->stopListening();
+    pinMode(softwarePin, OUTPUT);
+    delayMicroseconds(500);
+  }
+#endif
   byte frame[8];
   frame[0] = data.frameHeader;    
   frame[1] = lowByte(data.sensorId);
@@ -314,10 +325,16 @@ void SmartPort::SendData(SmartPortFrame& data)
   frame[6] = data.value.byteValue[3];  
   frame[7] = data.crc;
 
-  long total = 0;
   for(int i = 0; i < 8; i++)
     this->SendByte(frame[i]);
   data.lastSent = millis();
+#ifndef ARDUINO_XIAO_ESP32C3
+  if(softwarePin > 0)
+  {
+    pinMode(softwarePin, INPUT);
+    smartPort->listen();
+  }
+#endif
 }
 
 //Send a data byte the FrSky way

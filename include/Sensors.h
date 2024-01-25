@@ -12,7 +12,7 @@
 #define PIN_A3            A2	//A3 Sensor - Range 0-3.3V - Battery Range 0-18V
 #ifndef ARDUINO_XIAO_ESP32C3
   #define PIN_A4          A3	//A4 Sensor - Range 0-3.3V - Battery Range 0-18V#
-  #define D6              12
+  #define D6              13
   #define D7              13
 #endif
 
