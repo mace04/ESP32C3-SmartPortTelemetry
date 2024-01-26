@@ -25,6 +25,7 @@ void SmartPort::Begin(uint8_t rxPin, uint8_t txPin, bool inverted){
 #endif
   sensors->Begin();
   this->RegisterSensors();
+  lastPacketSent = millis();
 }
 
 void SmartPort::RegisterSensors()
@@ -223,11 +224,13 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
             if (sensorPolling0x22Loop % 2 == 0 && millis() - currData.lastSent > settings.RefreshRate && currData.isRegistered)
             {
               SetSensorValue(FRSKY_VALUE_TYPE_CURR, sensors->ReadSensor(SENSOR_CURR) * 100);
+              // TelePlot::Plot("CURR Interval:", millis() - currData.lastSent);
               this->SendData(currData);
             }
             if (sensorPolling0x22Loop % 2 == 1 && millis() - vfasData.lastSent > settings.RefreshRate && vfasData.isRegistered) 
             {
               SetSensorValue(FRSKY_VALUE_TYPE_VFAS, sensors->ReadSensor(SENSOR_VFAS) * 100);
+              // TelePlot::Plot("VFAS Interval:", millis() - vfasData.lastSent);
               this->SendData(vfasData);
             }
           break;
@@ -241,11 +244,13 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
           if (millis() - a3Data.lastSent > settings.RefreshRate && a3Data.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_A3, sensors->ReadSensor(SENSOR_A3));
+            // TelePlot::Plot("A3 Interval:", millis() - a3Data.lastSent);
             this->SendData(a3Data);
           }
           if (millis() - a4Data.lastSent > settings.RefreshRate && a4Data.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_A4, sensors->ReadSensor(SENSOR_A4));
+            // TelePlot::Plot("A4 Interval:", millis() - a4Data.lastSent);
             this->SendData(a4Data);
           }
           break;
@@ -253,6 +258,7 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
           if (millis() - fuelData.lastSent > settings.RefreshRate && fuelData.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_FUEL, sensors->ReadSensor(SENSOR_FUEL));
+            // TelePlot::Plot("FUEL Interval:", millis() - fuelData.lastSent);
             this->SendData(fuelData);
           }
           break;
@@ -320,6 +326,8 @@ void SmartPort::SendData(SmartPortFrame& data)
   for(int i = 0; i < 8; i++)
     this->SendByte(frame[i]);
   data.lastSent = millis();
+  // TelePlot::Plot("SPORT Packet Interval:", millis() - lastPacketSent);
+  lastPacketSent = millis();
 #ifndef ARDUINO_XIAO_ESP32C3
   if(softwarePin > 0)
   {

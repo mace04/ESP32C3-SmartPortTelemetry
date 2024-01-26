@@ -71,6 +71,7 @@ class SmartPort
         SmartPortFrame a4Data;
         SmartPortFrame airSpeedData;
         SmartPortSettings settings;
+        long int lastPacketSent;
 
         void RegisterSensors();
         void RegisterSensor(uint16_t sensorId);

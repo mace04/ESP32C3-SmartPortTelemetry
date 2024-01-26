@@ -159,8 +159,6 @@ void loop() {
 #endif
   // put your main code here, to run repeatedly:
   smartPort.Hanlde();
-  Serial.print(">processingTime:");
-  Serial.println(millis() - timer);
 }
 
 #ifdef ARDUINO_XIAO_ESP32C3
