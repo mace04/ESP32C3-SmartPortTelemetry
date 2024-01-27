@@ -160,7 +160,6 @@ float Sensors::GetCurrent() {
 			val += analogRead(PIN_CURR);// *MAX_CURRENT * 10.00 / 750.00;
 			delayMicroseconds(SAMPLE_DELAY_MS);
 		}
-		// TelePlot::Plot("PIN_CURR(A0):", (int) (val/SAMPLE_RATES));
 #ifdef _TEST_VALUES_
 		if (curretTestValue == 1023)
 			curretTestValue = 0;
@@ -175,8 +174,9 @@ float Sensors::GetCurrent() {
 		{
 			val = lastReadings.curr * SAMPLE_RATES;
 		}
-		retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 1000.00;
-		// TelePlot::Plot("CURR:", retval);
+		TelePlot::Plot("PIN_CURR(A0):", (int) (val/SAMPLE_RATES));
+		retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 10000.00;
+		TelePlot::Plot("CURR:", retval*10);
 	}
 	else {
 		retval = -1;
