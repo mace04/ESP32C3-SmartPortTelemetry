@@ -60,6 +60,10 @@ void Settings::SetSensorSettings(SensorSettings settings)
     settingsPreferences.putDouble("mvpp", settings.VoltsPerPoint);
     
     settingsPreferences.end();
+#else
+    ArduinoSettings fullSettings = ReadEeprom();
+    fullSettings.sensorSettings = settings;
+    WriteEeprom(fullSettings);
 #endif
 }
 
