@@ -11,8 +11,7 @@ SmartPortSettings Settings::GetSmartPortSettings()
     settings.RefreshRate = settingsPreferences.getInt("refreshRate", SPORT_REFRESH_RATE);
     settingsPreferences.end();
 #else
-    settings.BaudRate = SPORT_BAUD;
-    settings.RefreshRate = SPORT_REFRESH_RATE;
+    settings = ReadEeprom().smartPortSettings;
 #endif
     return settings;
 }
@@ -37,13 +36,7 @@ SensorSettings Settings::GetSensorSettings()
 
     settingsPreferences.end();
 #else
-    settings.EnableSensorCURR = true;
-    settings.EnableSensorVFAS = true;
-    settings.EnableSensorA3 = false;
-    settings.EnableSensorA4 = false;
-    settings.EnableSensorFuel = settings.EnableSensorCURR;
-    settings.AmpsPerPoint = MILLIAMPS_PER_POINT;
-    settings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
+    settings = ReadEeprom().sensorSettings;
 #endif
     return settings;
 }
@@ -97,5 +90,34 @@ void Settings::SetWiFiSettings(WiFiSettings settings)
     settingsPreferences.putString("hotspotSSID", settings.HotspotSSID);
     settingsPreferences.putString("hotspotPassword", settings.HotspotPassword);
     settingsPreferences.end();
+}
+#else
+ArduinoSettings Settings::ReadEeprom()
+{
+    ArduinoSettings settings;
+
+    if (EEPROM.read(0x00) == 0xFF) {
+        // Not saved data so use default data
+        settings.smartPortSettings.BaudRate = SPORT_BAUD;
+        settings.smartPortSettings.RefreshRate = SPORT_REFRESH_RATE;
+
+        settings.sensorSettings.EnableSensorCURR = false;
+        settings.sensorSettings.EnableSensorVFAS = true;
+        settings.sensorSettings.EnableSensorA3 = false;
+        settings.sensorSettings.EnableSensorA4 = false;
+        settings.sensorSettings.EnableSensorFuel = settings.sensorSettings.EnableSensorCURR;
+        settings.sensorSettings.AmpsPerPoint = MILLIAMPS_PER_POINT;
+        settings.sensorSettings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
+    }
+    else 
+    {
+        EEPROM.get(0x00, settings);
+    }
+    return settings;
+}
+
+void Settings::WriteEeprom(ArduinoSettings settings)
+{
+    EEPROM.put(0x00, settings);
 }
 #endif

@@ -3,10 +3,10 @@
 
 #include <Arduino.h>
 #ifdef ARDUINO_XIAO_ESP32C3
-#include <nvs_flash.h>
-#include <Preferences.h>
+    #include <nvs_flash.h>
+    #include <Preferences.h>
 #else
-#include <EEPROM.h>
+    #include <EEPROM.h>
 #endif
 
 // Sensor Default Configuration
@@ -24,7 +24,7 @@
 
 // SmartPort Default Configuration
 #define SPORT_BAUD              57600
-#define SPORT_REFRESH_RATE      300
+#define SPORT_REFRESH_RATE      200
 
 // WiFi Default Configuration
 #define WIFI_SSID               "SKYPGFYX"
@@ -61,19 +61,31 @@ struct WiFiSettings
     String HotspotSSID;
     String HotspotPassword;
 };
+#else
+struct ArduinoSettings
+{
+    SmartPortSettings smartPortSettings;
+    SensorSettings sensorSettings;
+};
 #endif
 
 class Settings
 {
     public:
         static SmartPortSettings GetSmartPortSettings();
-        void SetSmartPortSettings(SmartPortSettings settings);
+        static void SetSmartPortSettings(SmartPortSettings settings);
         static SensorSettings GetSensorSettings();
         static void SetSensorSettings(SensorSettings settings);
 #ifdef ARDUINO_XIAO_ESP32C3
         static WiFiSettings GetWiFiSettings();
         static void SetWiFiSettings(WiFiSettings settings);
 #endif
+    private:
+#ifndef ARDUINO_XIAO_ESP32C3
+        static ArduinoSettings ReadEeprom();
+        static void WriteEeprom(ArduinoSettings settings);
+#endif
+        
 };
 
 #endif
