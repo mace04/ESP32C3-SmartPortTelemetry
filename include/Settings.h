@@ -19,7 +19,7 @@
 #define CALIBRATION_A3          4.48  // Replaced by VPP
 #define CALIBRATION_A4          4.48  // Replaced by VPP
 #define CALIBRATION_FUEL        8.8
-#define MILLIVOLTS_PER_POINT    8.8644   // Default for max 36.3V @ 3.3V (4095 points)
+#define MILLIVOLTS_PER_POINT    26.295454   // Default for max 36.3V @ 3.3V (4095 points)
 #define MILLIAMPS_PER_POINT     24.42     // Default for max 100A @ 3.3V (4095 points)
 
 // SmartPort Default Configuration
