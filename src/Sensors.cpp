@@ -166,6 +166,15 @@ float Sensors::GetCurrent() {
 			curretTestValue = 0;
 		val = SAMPLE_RATES * curretTestValue++;
 #endif // _TEST_VALUES_
+	// Calculate tolerancde of +-2 points. if within tolerance use previous reading
+		if(val/SAMPLE_RATES > lastReadings.curr + (2) || val/SAMPLE_RATES < lastReadings.curr - (2))
+		{
+			lastReadings.curr = val / SAMPLE_RATES;
+		}
+		else
+		{
+			val = lastReadings.curr * SAMPLE_RATES;
+		}
 		retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 1000.00;
 		// TelePlot::Plot("CURR:", retval);
 	}
@@ -196,34 +205,48 @@ float Sensors::GetVoltage(int pin) {
 #endif
 
 	String sensorName, pinName;
+	unsigned int previousValue;
 	switch (pin) {
 	case PIN_VFAS:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
-		sensorName = "VFAS";
+		sensorName = "VFAS:";
 		pinName = "PIN_VFAS(A1):";
+		previousValue = lastReadings.vfas;
 		break;
 	case PIN_A3:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
-		sensorName = "A3";
+		sensorName = "A3:";
 		pinName = "PIN_A3(A2):";
+		previousValue = lastReadings.a3;
 		break;
 	#ifndef ARDUINO_XIAO_ESP32C3
 	case PIN_A4:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
-		sensorName = "A4";
+		sensorName = "A4:";
 		pinName = "PIN_A4(A3):";
+		previousValue = lastReadings.a4;
 		break;
 	#endif
 	default:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
-		sensorName = "VFAS";
+		sensorName = "VFAS:";
 		pinName = "PIN_VFAS(A1):";
+		previousValue = lastReadings.vfas;
 		break;
 	}
-	// TelePlot::Plot(pinName, (int)(val/SAMPLE_RATES));
+	// Calculate tolerancde of +-2 points. if within tolerance use previous reading
+	if(val/SAMPLE_RATES > previousValue + (2) || val/SAMPLE_RATES < previousValue - (2))
+	{
+		lastReadings.vfas = val / SAMPLE_RATES;
+	}
+	else
+	{
+		val = lastReadings.vfas * SAMPLE_RATES;
+	}
+	TelePlot::Plot(pinName, (int)(val/SAMPLE_RATES));
 
-	float retval = ((float)val / (float) SAMPLE_RATES) * vpp / (1000.00 * 10.00) ;
-	// TelePlot::Plot(sensorName, retval);
+	float retval = ((float)val / (float) SAMPLE_RATES) * vpp / 1000.00  ;
+	TelePlot::Plot(sensorName, retval);
 	// TelePlot::Plot(sensorName + " Sensor Duration:", micros() - durationTime);
 	return retval;
 }

@@ -5,7 +5,7 @@
 #include <SFE_BMP180.h>
 #include <Wire.h>
 #include <Settings.h>
-// #include <TelePlot.h>
+#include <TelePlot.h>
 
 #define PIN_CURR          A0	//Current Sensor - Range 0-3.3V
 #define PIN_VFAS          A1	//VFAS Sensor - Range 0-3.3V - Battery Range 0-18V
@@ -27,7 +27,7 @@
 #define SENSOR_A4             0x0910
 #define SENSOR_AIR_SPEED      0x0a00
 
-#define SAMPLE_RATES			30
+#define SAMPLE_RATES			5
 #define SAMPLE_DELAY_MS   5
 
 
@@ -48,6 +48,13 @@ class Sensors
     float current;
     float consumption;
     SensorSettings settings;
+    struct 
+    {
+      unsigned int curr = 0;
+      unsigned int vfas = 0;
+      unsigned int a3 = 0;
+      unsigned int a4 = 0;
+    } lastReadings;
 
     bool isSensorAlt = false;
     bool isSensorCurr = false;
