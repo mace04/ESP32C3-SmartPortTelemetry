@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include <Settings.h>
 #include <Sensors.h>
+#ifndef ARDUINO_XIAO_ESP32C3
+    #include <SoftwareSerial.h>
+#endif
 
 #define FRSKY_SENSORID_VARIO            0x00
 #define FRSKY_SENSORID_FLVSS            0xA1
@@ -42,7 +45,6 @@ struct SmartPortFrame
 class SmartPort
 {
     public:
-        // SmartPort();
         SmartPort();
         void Begin(uint8_t rxPin = D7, uint8_t txPin = D6, bool inverted = false);
         bool IsRegistered(uint16_t sensorId);
@@ -52,7 +54,11 @@ class SmartPort
     private:
         unsigned long sensorPolling0x22Loop = 0;
         int softwarePin = -1;
+#ifdef ARDUINO_XIAO_ESP32C3
         HardwareSerial* smartPort = new HardwareSerial(1);
+#else
+        SoftwareSerial* smartPort;
+#endif
         Sensors* sensors = new Sensors();
         SmartPortFrame altData;
         SmartPortFrame currData;
@@ -65,6 +71,7 @@ class SmartPort
         SmartPortFrame a4Data;
         SmartPortFrame airSpeedData;
         SmartPortSettings settings;
+        long int lastPacketSent;
 
         void RegisterSensors();
         void RegisterSensor(uint16_t sensorId);

@@ -2,24 +2,29 @@
 
 SmartPortSettings Settings::GetSmartPortSettings()
 {
+    SmartPortSettings settings;
+ #ifdef ARDUINO_XIAO_ESP32C3
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SPORT_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
-    SmartPortSettings settings;
     settings.BaudRate = settingsPreferences.getInt("baudRate", SPORT_BAUD);
     settings.RefreshRate = settingsPreferences.getInt("refreshRate", SPORT_REFRESH_RATE);
     settingsPreferences.end();
+#else
+    settings = ReadEeprom().smartPortSettings;
+#endif
     return settings;
 }
 
 SensorSettings Settings::GetSensorSettings() 
 {
+    SensorSettings settings;
     //TODO Add ALT sensor
     //TODO Add calibration settings for ALT sensor
-    Preferences settingsPreferences;
+ #ifdef ARDUINO_XIAO_ESP32C3
+   Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
-    SensorSettings settings;
 
     settings.EnableSensorCURR = settingsPreferences.getBool("enableCURR", false);
     settings.EnableSensorVFAS = settingsPreferences.getBool("enableVFAS", false);
@@ -30,6 +35,9 @@ SensorSettings Settings::GetSensorSettings()
     settings.VoltsPerPoint = settingsPreferences.getDouble("mvpp", MILLIVOLTS_PER_POINT);
 
     settingsPreferences.end();
+#else
+    settings = ReadEeprom().sensorSettings;
+#endif
     return settings;
 }
 
@@ -37,6 +45,8 @@ void Settings::SetSensorSettings(SensorSettings settings)
 {
     //TODO Enable/disable ALT sensor
     //TODO Set calibration settings for ALT sensor
+    //TODO Save sensor settings to EEPROM for Arduino
+ #ifdef ARDUINO_XIAO_ESP32C3
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, false))
         Serial.println("Error initialising NVS for Sensors");
@@ -50,9 +60,14 @@ void Settings::SetSensorSettings(SensorSettings settings)
     settingsPreferences.putDouble("mvpp", settings.VoltsPerPoint);
     
     settingsPreferences.end();
-
+#else
+    ArduinoSettings fullSettings = ReadEeprom();
+    fullSettings.sensorSettings = settings;
+    WriteEeprom(fullSettings);
+#endif
 }
 
+#ifdef ARDUINO_XIAO_ESP32C3
 WiFiSettings Settings::GetWiFiSettings()
 {
     Preferences settingsPreferences;
@@ -80,3 +95,104 @@ void Settings::SetWiFiSettings(WiFiSettings settings)
     settingsPreferences.putString("hotspotPassword", settings.HotspotPassword);
     settingsPreferences.end();
 }
+#else
+ArduinoSettings Settings::ReadEeprom()
+{
+    ArduinoSettings settings;
+
+    if (EEPROM.read(0x00) == 0xFF) {
+        // Not saved data so use default data
+        settings.smartPortSettings.BaudRate = SPORT_BAUD;
+        settings.smartPortSettings.RefreshRate = SPORT_REFRESH_RATE;
+
+        settings.sensorSettings.EnableSensorCURR = false;
+        settings.sensorSettings.EnableSensorVFAS = true;
+        settings.sensorSettings.EnableSensorA3 = false;
+        settings.sensorSettings.EnableSensorA4 = false;
+        settings.sensorSettings.EnableSensorFuel = settings.sensorSettings.EnableSensorCURR;
+        settings.sensorSettings.AmpsPerPoint = MILLIAMPS_PER_POINT;
+        settings.sensorSettings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
+    }
+    else 
+    {
+        EEPROM.get(0x00, settings);
+    }
+    return settings;
+}
+
+void Settings::WriteEeprom(ArduinoSettings settings)
+{
+    EEPROM.put(0x00, settings);
+}
+
+void Settings::handle()
+{
+    if(Serial.available())
+    {
+        // Serial.setTimeout(50);
+        String command = Serial.readStringUntil('\n');
+        Serial << ":" << command << ":" << endl;
+        if(command.startsWith("GET"))
+        {
+            ArduinoSettings settings = ReadEeprom();
+            Serial << "SMARTPORT," << settings.smartPortSettings.BaudRate << "," << settings.smartPortSettings.RefreshRate << endl;
+            Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
+                << settings.sensorSettings.EnableSensorVFAS << ","
+                << settings.sensorSettings.EnableSensorFuel << ","
+                << settings.sensorSettings.EnableSensorA3 << ","
+                << settings.sensorSettings.EnableSensorA4 << ","
+                << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;
+        }
+        else if(command.startsWith("SET,SMARTPORT"))
+        {
+            ArduinoSettings settings = ReadEeprom();
+            settings.smartPortSettings.BaudRate = getValue(command, ',', 2).toInt();
+            settings.smartPortSettings.RefreshRate = getValue(command, ',', 3).toInt();
+            WriteEeprom(settings);
+            Serial << "SMARTPORT," << settings.smartPortSettings.BaudRate << "," << settings.smartPortSettings.RefreshRate << endl;
+        }
+        else if(command.startsWith("SET,SENSORS"))
+        {
+            ArduinoSettings settings = ReadEeprom();
+            settings.sensorSettings.EnableSensorCURR = getValue(command, ',', 2).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorVFAS = getValue(command, ',', 3).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorFuel = getValue(command, ',', 4).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorA3 = getValue(command, ',', 5).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorA4 = getValue(command, ',', 6).toInt() == 1 ? true : false;
+            settings.sensorSettings.AmpsPerPoint = getValue(command, ',', 7).toFloat();
+            settings.sensorSettings.VoltsPerPoint = getValue(command, ',', 8).toFloat();
+            WriteEeprom(settings);
+            Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
+                << settings.sensorSettings.EnableSensorVFAS << ","
+                << settings.sensorSettings.EnableSensorFuel << ","
+                << settings.sensorSettings.EnableSensorA3 << ","
+                << settings.sensorSettings.EnableSensorA4 << ","
+                << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;        
+        }
+        else if(command.startsWith("RESET"))
+        {
+            EEPROM.write(0x00, 0xFF);
+            Serial << "RESET,OK" << endl;
+        }
+        
+    }
+}
+
+String Settings::getValue(String data, char separator, int index)
+{
+    int found = 0;
+    int strIndex[] = { 0, -1 };
+    int maxIndex = data.length() - 1;
+
+    for (int i = 0; i <= maxIndex && found <= index; i++) {
+        if (data.charAt(i) == separator || i == maxIndex) {
+            found++;
+            strIndex[0] = strIndex[1] + 1;
+            strIndex[1] = (i == maxIndex) ? i+1 : i;
+        }
+    }
+    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+#endif

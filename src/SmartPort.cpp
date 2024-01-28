@@ -12,10 +12,20 @@ SmartPort::SmartPort()
 }
 
 void SmartPort::Begin(uint8_t rxPin, uint8_t txPin, bool inverted){
-  this->settings = Settings::GetSmartPortSettings();
+  settings = Settings::GetSmartPortSettings();
+#ifdef ARDUINO_XIAO_ESP32C3
   smartPort->begin(settings.BaudRate, SERIAL_8N1, rxPin, txPin, inverted);
+#else
+  smartPort = new SoftwareSerial(13, 13, true); //Always inverted Serial comm for Soft Serial
+  if(rxPin == txPin) softwarePin = rxPin;
+  Serial.println(settings.BaudRate);
+  smartPort->begin(settings.BaudRate);
+  pinMode(softwarePin, INPUT);
+  smartPort->listen();
+#endif
   sensors->Begin();
   this->RegisterSensors();
+  lastPacketSent = millis();
 }
 
 void SmartPort::RegisterSensors()
@@ -207,7 +217,6 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
     if (smartPort->read() == 0x7E){
       while(smartPort->available() == 0);
       int polledSensor = smartPort->read();
-// Serial.printf("Polling 0x7e 0x%02x\n", polledSensor);
       switch(polledSensor)
       {
         case 0x22:  // Physical ID 3 - FAS-40S current sensor
@@ -215,32 +224,33 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
             if (sensorPolling0x22Loop % 2 == 0 && millis() - currData.lastSent > settings.RefreshRate && currData.isRegistered)
             {
               SetSensorValue(FRSKY_VALUE_TYPE_CURR, sensors->ReadSensor(SENSOR_CURR) * 100);
+              // TelePlot::Plot("CURR Interval:", millis() - currData.lastSent);
               this->SendData(currData);
             }
             if (sensorPolling0x22Loop % 2 == 1 && millis() - vfasData.lastSent > settings.RefreshRate && vfasData.isRegistered) 
             {
               SetSensorValue(FRSKY_VALUE_TYPE_VFAS, sensors->ReadSensor(SENSOR_VFAS) * 100);
+              // TelePlot::Plot("VFAS Interval:", millis() - vfasData.lastSent);
               this->SendData(vfasData);
             }
-// Serial.printf("%03i    VFAS Registered: %i, header: %02x, sensorId: %04x value: %04i, crc: %02x\n", 
-//   sensorPolling0x22Loop, vfasData.isRegistered, vfasData.frameHeader, vfasData.sensorId, vfasData.value.longValue, vfasData.crc);
           break;
         case 0x83:  // Physical ID 4 - GPS / altimeter (normal precision)
           // if (loop % 3 == 0 && gpsAltData.isRegistered) this->SendData(gpsAltData);
           // if (loop % 3 == 1 && gpsSpeedData.isRegistered) this->SendData(gpsSpeedData);
           // TODO Send ALT data to Smartport receiver
           // if (loop % 3 == 2 && altData.isRegistered) this->SendData(altData);
-// Serial.printf("%09u SensorId: 0x83   GPSALT: %05i   GPSSPD: %05i   ALT: %05i\n", millis(), gpsAltData.value.longValue, gpsSpeedData.value.longValue, altData.value.longValue);
           break;
         case 0x45:  // Physical ID 6 - SP2UART(Host)
           if (millis() - a3Data.lastSent > settings.RefreshRate && a3Data.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_A3, sensors->ReadSensor(SENSOR_A3));
+            // TelePlot::Plot("A3 Interval:", millis() - a3Data.lastSent);
             this->SendData(a3Data);
           }
           if (millis() - a4Data.lastSent > settings.RefreshRate && a4Data.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_A4, sensors->ReadSensor(SENSOR_A4));
+            // TelePlot::Plot("A4 Interval:", millis() - a4Data.lastSent);
             this->SendData(a4Data);
           }
           break;
@@ -248,9 +258,9 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
           if (millis() - fuelData.lastSent > settings.RefreshRate && fuelData.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_FUEL, sensors->ReadSensor(SENSOR_FUEL));
+            // TelePlot::Plot("FUEL Interval:", millis() - fuelData.lastSent);
             this->SendData(fuelData);
           }
-// Serial.printf("%09u SensorId: 0x98   FUEL: %05i\n", millis(), fuelData.value.longValue);
           break;
         default:
           break;
@@ -295,11 +305,14 @@ byte SmartPort::GetChecksum(SmartPortFrame data)
 
 void SmartPort::SendData(SmartPortFrame& data)
 {
-  if(softwarePin > 0) {
-      // smartPort->stopListening();
-      pinMode(softwarePin, OUTPUT);
-      delay(1);
-  }  
+#ifndef ARDUINO_XIAO_ESP32C3
+  if(softwarePin > 0)
+  {
+    smartPort->stopListening();
+    pinMode(softwarePin, OUTPUT);
+    delayMicroseconds(500);
+  }
+#endif
   byte frame[8];
   frame[0] = data.frameHeader;    
   frame[1] = lowByte(data.sensorId);
@@ -310,10 +323,18 @@ void SmartPort::SendData(SmartPortFrame& data)
   frame[6] = data.value.byteValue[3];  
   frame[7] = data.crc;
 
-  long total = 0;
   for(int i = 0; i < 8; i++)
     this->SendByte(frame[i]);
   data.lastSent = millis();
+  // TelePlot::Plot("SPORT Packet Interval:", millis() - lastPacketSent);
+  lastPacketSent = millis();
+#ifndef ARDUINO_XIAO_ESP32C3
+  if(softwarePin > 0)
+  {
+    pinMode(softwarePin, INPUT);
+    smartPort->listen();
+  }
+#endif
 }
 
 //Send a data byte the FrSky way
