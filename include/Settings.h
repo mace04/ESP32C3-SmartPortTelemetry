@@ -7,6 +7,7 @@
     #include <Preferences.h>
 #else
     #include <EEPROM.h>
+    #include <Streaming.h>
 #endif
 
 // Sensor Default Configuration
@@ -79,11 +80,14 @@ class Settings
 #ifdef ARDUINO_XIAO_ESP32C3
         static WiFiSettings GetWiFiSettings();
         static void SetWiFiSettings(WiFiSettings settings);
+#else
+        static void handle();
 #endif
     private:
 #ifndef ARDUINO_XIAO_ESP32C3
         static ArduinoSettings ReadEeprom();
         static void WriteEeprom(ArduinoSettings settings);
+        static String getValue(String data, char separator, int index);
 #endif
         
 };

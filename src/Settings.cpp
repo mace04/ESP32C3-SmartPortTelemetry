@@ -124,4 +124,75 @@ void Settings::WriteEeprom(ArduinoSettings settings)
 {
     EEPROM.put(0x00, settings);
 }
+
+void Settings::handle()
+{
+    if(Serial.available())
+    {
+        // Serial.setTimeout(50);
+        String command = Serial.readStringUntil('\n');
+        Serial << ":" << command << ":" << endl;
+        if(command.startsWith("GET"))
+        {
+            ArduinoSettings settings = ReadEeprom();
+            Serial << "SMARTPORT," << settings.smartPortSettings.BaudRate << "," << settings.smartPortSettings.RefreshRate << endl;
+            Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
+                << settings.sensorSettings.EnableSensorVFAS << ","
+                << settings.sensorSettings.EnableSensorFuel << ","
+                << settings.sensorSettings.EnableSensorA3 << ","
+                << settings.sensorSettings.EnableSensorA4 << ","
+                << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;
+        }
+        else if(command.startsWith("SET,SMARTPORT"))
+        {
+            ArduinoSettings settings = ReadEeprom();
+            settings.smartPortSettings.BaudRate = getValue(command, ',', 2).toInt();
+            settings.smartPortSettings.RefreshRate = getValue(command, ',', 3).toInt();
+            WriteEeprom(settings);
+            Serial << "SMARTPORT," << settings.smartPortSettings.BaudRate << "," << settings.smartPortSettings.RefreshRate << endl;
+        }
+        else if(command.startsWith("SET,SENSORS"))
+        {
+            ArduinoSettings settings = ReadEeprom();
+            settings.sensorSettings.EnableSensorCURR = getValue(command, ',', 2).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorVFAS = getValue(command, ',', 3).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorFuel = getValue(command, ',', 4).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorA3 = getValue(command, ',', 5).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorA4 = getValue(command, ',', 6).toInt() == 1 ? true : false;
+            settings.sensorSettings.AmpsPerPoint = getValue(command, ',', 7).toFloat();
+            settings.sensorSettings.VoltsPerPoint = getValue(command, ',', 8).toFloat();
+            WriteEeprom(settings);
+            Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
+                << settings.sensorSettings.EnableSensorVFAS << ","
+                << settings.sensorSettings.EnableSensorFuel << ","
+                << settings.sensorSettings.EnableSensorA3 << ","
+                << settings.sensorSettings.EnableSensorA4 << ","
+                << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;        
+        }
+        else if(command.startsWith("RESET"))
+        {
+            EEPROM.write(0x00, 0xFF);
+            Serial << "RESET,OK" << endl;
+        }
+        
+    }
+}
+
+String Settings::getValue(String data, char separator, int index)
+{
+    int found = 0;
+    int strIndex[] = { 0, -1 };
+    int maxIndex = data.length() - 1;
+
+    for (int i = 0; i <= maxIndex && found <= index; i++) {
+        if (data.charAt(i) == separator || i == maxIndex) {
+            found++;
+            strIndex[0] = strIndex[1] + 1;
+            strIndex[1] = (i == maxIndex) ? i+1 : i;
+        }
+    }
+    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
 #endif

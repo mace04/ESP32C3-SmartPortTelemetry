@@ -156,6 +156,8 @@ void loop() {
     ArduinoOTA.handle();
     server.handleClient();
   }
+#else
+  Settings::handle();
 #endif
   // put your main code here, to run repeatedly:
   smartPort.Hanlde();
