@@ -174,9 +174,9 @@ float Sensors::GetCurrent() {
 		{
 			val = lastReadings.curr * SAMPLE_RATES;
 		}
-		TelePlot::Plot("PIN_CURR(A0):", (int) (val/SAMPLE_RATES));
+		// TelePlot::Plot("PIN_CURR(A0):", (int) (val/SAMPLE_RATES));
 		retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 10000.00;
-		TelePlot::Plot("CURR:", retval*10);
+		// TelePlot::Plot("CURR:", retval*10);
 	}
 	else {
 		retval = -1;
@@ -243,10 +243,10 @@ float Sensors::GetVoltage(int pin) {
 	{
 		val = lastReadings.vfas * SAMPLE_RATES;
 	}
-	TelePlot::Plot(pinName, (int)(val/SAMPLE_RATES));
+	// TelePlot::Plot(pinName, (int)(val/SAMPLE_RATES));
 
 	float retval = ((float)val / (float) SAMPLE_RATES) * vpp / 1000.00  ;
-	TelePlot::Plot(sensorName, retval);
+	// TelePlot::Plot(sensorName, retval);
 	// TelePlot::Plot(sensorName + " Sensor Duration:", micros() - durationTime);
 	return retval;
 }
