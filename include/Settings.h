@@ -11,17 +11,12 @@
 #endif
 
 // Sensor Default Configuration
-#define R1                      47000.0000  // Replaced by VPP
-#define R2                      10000.0000  // Replaced by VPP
 #define MAX_CURRENT             184.0   // Replaced by APP
-#define CURRENT_PRECISSION		1.00  // Replaced by APP
-#define CALIBRATION_CURR        1.00  // Replaced by VPP
-#define CALIBRATION_VFAS        4.48  // Replaced by VPP
-#define CALIBRATION_A3          4.48  // Replaced by VPP
-#define CALIBRATION_A4          4.48  // Replaced by VPP
 #define CALIBRATION_FUEL        8.8
+#define CURR_VOLT_REF           5.00     // Voltage Reference of current sensor
+#define CURR_SENSITIVITY        40.00    // mV/A sensitivity of current sensor
+#define CURR_OFFSET             2.54    // Zero-current output sensor voltage (offset voltage)
 #define MILLIVOLTS_PER_POINT    26.295454   // Default for max 36.3V @ 3.3V (4095 points)
-#define MILLIAMPS_PER_POINT     24.42     // Default for max 100A @ 3.3V (4095 points)
 
 // SmartPort Default Configuration
 #define SPORT_BAUD              57600
@@ -50,7 +45,10 @@ struct SensorSettings
     bool EnableSensorA3;
     bool EnableSensorA4;
     bool EnableSensorFuel;
-    double AmpsPerPoint;    // In milliAmps
+    // double AmpsPerPoint;    // In milliAmps
+    double CurrVoltageRef;
+    double CurrSensitivity;
+    double CurrOffset;
     double VoltsPerPoint;   // In milliVolts
 };
 

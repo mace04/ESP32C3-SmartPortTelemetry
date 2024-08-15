@@ -175,7 +175,15 @@ float Sensors::GetCurrent() {
 			val = lastReadings.curr * SAMPLE_RATES;
 		}
 		// TelePlot::Plot("PIN_CURR(A0):", (int) (val/SAMPLE_RATES));
-		retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 10000.00;
+
+        // Read the raw ADC sample values from the ACS758_PIN
+        int raw_adc = val / SAMPLE_RATES;
+        // Convert the raw ADC value to voltage in millivolts
+        float voltage = raw_adc * (Settings::GetSensorSettings().CurrVoltageRef / 4095.0);
+        // Calculate the current based on the voltage and the sensor's sensitivity and zero-current voltage output
+        retval = (voltage - Settings::GetSensorSettings().CurrOffset)/ Settings::GetSensorSettings().CurrSensitivity;  
+
+		// retval = ((float) val / (float) SAMPLE_RATES) * Settings::GetSensorSettings().AmpsPerPoint / 10000.00;
 		// TelePlot::Plot("CURR:", retval*10);
 	}
 	else {

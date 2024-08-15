@@ -31,7 +31,10 @@ SensorSettings Settings::GetSensorSettings()
     settings.EnableSensorA3 = settingsPreferences.getBool("enableA3", false);
     settings.EnableSensorA4 = settingsPreferences.getBool("enableA4", false);
     settings.EnableSensorFuel = settingsPreferences.getBool("enableFuel", false);
-    settings.AmpsPerPoint = settingsPreferences.getDouble("mapp", MILLIAMPS_PER_POINT);
+    // settings.AmpsPerPoint = settingsPreferences.getDouble("mapp", MILLIAMPS_PER_POINT);
+    settings.CurrVoltageRef = settingsPreferences.getDouble("vref", CURR_VOLT_REF);
+    settings.CurrSensitivity = settingsPreferences.getDouble("mvpa", CURR_SENSITIVITY);
+    settings.CurrOffset = settingsPreferences.getDouble("offset", CURR_OFFSET);
     settings.VoltsPerPoint = settingsPreferences.getDouble("mvpp", MILLIVOLTS_PER_POINT);
 
     settingsPreferences.end();
@@ -56,7 +59,10 @@ void Settings::SetSensorSettings(SensorSettings settings)
     settingsPreferences.putBool("enableA3", settings.EnableSensorA3);
     settingsPreferences.putBool("enableA4", settings.EnableSensorA4);
     settingsPreferences.putBool("enableFuel", settings.EnableSensorFuel);
-    settingsPreferences.putDouble("mapp", settings.AmpsPerPoint);
+    // settingsPreferences.putDouble("mapp", settings.AmpsPerPoint);
+    settingsPreferences.putDouble("vref", settings.CurrVoltageRef);
+    settingsPreferences.putDouble("mvpa", settings.CurrSensitivity);
+    settingsPreferences.putDouble("offset", settings.CurrOffset);
     settingsPreferences.putDouble("mvpp", settings.VoltsPerPoint);
     
     settingsPreferences.end();
@@ -110,7 +116,10 @@ ArduinoSettings Settings::ReadEeprom()
         settings.sensorSettings.EnableSensorA3 = false;
         settings.sensorSettings.EnableSensorA4 = false;
         settings.sensorSettings.EnableSensorFuel = settings.sensorSettings.EnableSensorCURR;
-        settings.sensorSettings.AmpsPerPoint = MILLIAMPS_PER_POINT;
+        // settings.sensorSettings.AmpsPerPoint = MILLIAMPS_PER_POINT;
+        settings.CurrVoltageRef = CURR_VOLT_REF;
+        settings.CurrSensitivity = CURR_SENSITIVITY;
+        settings.CurrOffset = CURR_OFFSET;
         settings.sensorSettings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
     }
     else 
@@ -141,7 +150,10 @@ void Settings::handle()
                 << settings.sensorSettings.EnableSensorFuel << ","
                 << settings.sensorSettings.EnableSensorA3 << ","
                 << settings.sensorSettings.EnableSensorA4 << ","
-                << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                // << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                << _FLOAT(settings.sensorSettings.CurrVoltageRef, 6) << ","
+                << _FLOAT(settings.sensorSettings.CurrSensitivity, 6) << ","
+                << _FLOAT(settings.sensorSettings.CurrOffset, 6) << ","
                 << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;
         }
         else if(command.startsWith("SET,SMARTPORT"))
@@ -160,15 +172,21 @@ void Settings::handle()
             settings.sensorSettings.EnableSensorFuel = getValue(command, ',', 4).toInt() == 1 ? true : false;
             settings.sensorSettings.EnableSensorA3 = getValue(command, ',', 5).toInt() == 1 ? true : false;
             settings.sensorSettings.EnableSensorA4 = getValue(command, ',', 6).toInt() == 1 ? true : false;
-            settings.sensorSettings.AmpsPerPoint = getValue(command, ',', 7).toFloat();
-            settings.sensorSettings.VoltsPerPoint = getValue(command, ',', 8).toFloat();
+            // settings.sensorSettings.AmpsPerPoint = getValue(command, ',', 7).toFloat();
+            settings.sensorSettings.CurrVoltageRef = getValue(command, ',', 7).toFloat();
+            settings.sensorSettings.CurrSensitivity = getValue(command, ',', 8).toFloat();
+            settings.sensorSettings.CurrOffset = getValue(command, ',', 9).toFloat();
+            settings.sensorSettings.VoltsPerPoint = getValue(command, ',', 10).toFloat();
             WriteEeprom(settings);
             Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
                 << settings.sensorSettings.EnableSensorVFAS << ","
                 << settings.sensorSettings.EnableSensorFuel << ","
                 << settings.sensorSettings.EnableSensorA3 << ","
                 << settings.sensorSettings.EnableSensorA4 << ","
-                << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                // << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
+                << _FLOAT(settings.sensorSettings.CurrVoltageRef, 6) << ","
+                << _FLOAT(settings.sensorSettings.CurrSensitivity, 6) << ","
+                << _FLOAT(settings.sensorSettings.CurrOffset, 6) << ","
                 << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;        
         }
         else if(command.startsWith("RESET"))
