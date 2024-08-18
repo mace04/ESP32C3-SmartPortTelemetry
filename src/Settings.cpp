@@ -3,7 +3,7 @@
 SmartPortSettings Settings::GetSmartPortSettings()
 {
     SmartPortSettings settings;
- #ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SPORT_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
@@ -21,7 +21,7 @@ SensorSettings Settings::GetSensorSettings()
     SensorSettings settings;
     //TODO Add ALT sensor
     //TODO Add calibration settings for ALT sensor
- #ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
    Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, true))
         Serial.println("Error initialising NVS for Sensors");
@@ -49,7 +49,7 @@ void Settings::SetSensorSettings(SensorSettings settings)
     //TODO Enable/disable ALT sensor
     //TODO Set calibration settings for ALT sensor
     //TODO Save sensor settings to EEPROM for Arduino
- #ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SENSORS_STORAGE_SPACE, false))
         Serial.println("Error initialising NVS for Sensors");
@@ -73,7 +73,7 @@ void Settings::SetSensorSettings(SensorSettings settings)
 #endif
 }
 
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
 WiFiSettings Settings::GetWiFiSettings()
 {
     Preferences settingsPreferences;
@@ -117,9 +117,9 @@ ArduinoSettings Settings::ReadEeprom()
         settings.sensorSettings.EnableSensorA4 = false;
         settings.sensorSettings.EnableSensorFuel = settings.sensorSettings.EnableSensorCURR;
         // settings.sensorSettings.AmpsPerPoint = MILLIAMPS_PER_POINT;
-        settings.CurrVoltageRef = CURR_VOLT_REF;
-        settings.CurrSensitivity = CURR_SENSITIVITY;
-        settings.CurrOffset = CURR_OFFSET;
+        settings.sensorSettings.CurrVoltageRef = CURR_VOLT_REF;
+        settings.sensorSettings.CurrSensitivity = CURR_SENSITIVITY;
+        settings.sensorSettings.CurrOffset = CURR_OFFSET;
         settings.sensorSettings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
     }
     else 

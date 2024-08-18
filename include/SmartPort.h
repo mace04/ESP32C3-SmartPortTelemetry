@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <Settings.h>
 #include <Sensors.h>
-#ifndef ARDUINO_XIAO_ESP32C3
+#if  !defined(ARDUINO_XIAO_ESP32C3) && !defined(ESP32)
     #include <SoftwareSerial.h>
 #endif
 
@@ -54,7 +54,7 @@ class SmartPort
     private:
         unsigned long sensorPolling0x22Loop = 0;
         int softwarePin = -1;
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
         HardwareSerial* smartPort = new HardwareSerial(1);
 #else
         SoftwareSerial* smartPort;

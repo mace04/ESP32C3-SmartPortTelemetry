@@ -17,12 +17,12 @@ Reference to other projects and information:
 */
 
 #include <Arduino.h>
-#ifdef ARDUINO_XIAO_ESP32C3
-#include <WiFi.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
+    #include <WiFi.h>
+    #include <WebServer.h>
+    #include <ESPmDNS.h>
+    #include <WiFiUdp.h>
+    #include <ArduinoOTA.h>
 #endif
 #include <Settings.h>
 #include <SmartPort.h>
@@ -35,7 +35,7 @@ String SendHTML();
 
 #define SERIAL_BAUD 115200
 
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
 WebServer server(80);
 #endif
 SmartPort smartPort;
@@ -50,7 +50,7 @@ void setup() {
   // nvs_flash_init(); // initialize the NVS partition.
   // while(true);
 
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
   unsigned long wifiConnectionTime;
   WiFi.mode(WIFI_STA);
   WiFiSettings wifiSettings = Settings::GetWiFiSettings();
@@ -150,7 +150,7 @@ void setup() {
 long int timer;
 void loop() { 
   timer = millis();
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
   if(wifiConnected)
   {
     ArduinoOTA.handle();
@@ -163,7 +163,7 @@ void loop() {
   smartPort.Hanlde();
 }
 
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
 void handle_OnGet() {
  
 //  Temperature = dht.readTemperature(); // Gets the values of the temperature

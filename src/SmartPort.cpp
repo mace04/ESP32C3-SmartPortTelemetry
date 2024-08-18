@@ -13,7 +13,7 @@ SmartPort::SmartPort()
 
 void SmartPort::Begin(uint8_t rxPin, uint8_t txPin, bool inverted){
   settings = Settings::GetSmartPortSettings();
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
   smartPort->begin(settings.BaudRate, SERIAL_8N1, rxPin, txPin, inverted);
 #else
   smartPort = new SoftwareSerial(13, 13, true); //Always inverted Serial comm for Soft Serial
@@ -305,7 +305,7 @@ byte SmartPort::GetChecksum(SmartPortFrame data)
 
 void SmartPort::SendData(SmartPortFrame& data)
 {
-#ifndef ARDUINO_XIAO_ESP32C3
+#if !defined(ARDUINO_XIAO_ESP32C3) && !defined(ESP32)
   if(softwarePin > 0)
   {
     smartPort->stopListening();
@@ -328,7 +328,7 @@ void SmartPort::SendData(SmartPortFrame& data)
   data.lastSent = millis();
   // TelePlot::Plot("SPORT Packet Interval:", millis() - lastPacketSent);
   lastPacketSent = millis();
-#ifndef ARDUINO_XIAO_ESP32C3
+#if !defined(ARDUINO_XIAO_ESP32C3) && !defined(ESP32)
   if(softwarePin > 0)
   {
     pinMode(softwarePin, INPUT);

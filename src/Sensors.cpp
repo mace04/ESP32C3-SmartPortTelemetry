@@ -227,14 +227,14 @@ float Sensors::GetVoltage(int pin) {
 		pinName = "PIN_A3(A2):";
 		previousValue = lastReadings.a3;
 		break;
-	#ifndef ARDUINO_XIAO_ESP32C3
+#if !defined(ARDUINO_XIAO_ESP32C3) && !defined(ESP32)
 	case PIN_A4:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		sensorName = "A4:";
 		pinName = "PIN_A4(A3):";
 		previousValue = lastReadings.a4;
 		break;
-	#endif
+#endif
 	default:
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		sensorName = "VFAS:";

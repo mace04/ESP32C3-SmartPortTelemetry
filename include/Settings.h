@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 #include <Arduino.h>
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
     #include <nvs_flash.h>
     #include <Preferences.h>
 #else
@@ -26,7 +26,7 @@
 #define WIFI_SSID               "SKYPGFYX"
 #define WIFI_PASSWORD           "HDXvtRKbPi8i"
 
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
 #define SPORT_STORAGE_SPACE     "sport-config"
 #define SENSORS_STORAGE_SPACE   "sensors-config"
 #define WIFI_STORAGE_SPACE      "wifi-config"
@@ -52,7 +52,7 @@ struct SensorSettings
     double VoltsPerPoint;   // In milliVolts
 };
 
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
 struct WiFiSettings
 {
     String WiFiSSID;
@@ -75,14 +75,14 @@ class Settings
         static void SetSmartPortSettings(SmartPortSettings settings);
         static SensorSettings GetSensorSettings();
         static void SetSensorSettings(SensorSettings settings);
-#ifdef ARDUINO_XIAO_ESP32C3
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
         static WiFiSettings GetWiFiSettings();
         static void SetWiFiSettings(WiFiSettings settings);
 #else
         static void handle();
 #endif
     private:
-#ifndef ARDUINO_XIAO_ESP32C3
+#if !defined(ARDUINO_XIAO_ESP32C3) && !defined(ESP32)
         static ArduinoSettings ReadEeprom();
         static void WriteEeprom(ArduinoSettings settings);
         static String getValue(String data, char separator, int index);
