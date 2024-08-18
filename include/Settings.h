@@ -40,11 +40,11 @@ struct SmartPortSettings
 
 struct SensorSettings
 {
-    bool EnableSensorCURR;
-    bool EnableSensorVFAS;
-    bool EnableSensorA3;
-    bool EnableSensorA4;
-    bool EnableSensorFuel;
+    bool EnableSensorCURR = false;
+    bool EnableSensorVFAS = false;
+    bool EnableSensorA3 = false;
+    bool EnableSensorA4 = false;
+    bool EnableSensorFuel = false;
     // double AmpsPerPoint;    // In milliAmps
     double CurrVoltageRef;
     double CurrSensitivity;

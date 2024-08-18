@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ESP32 Webserver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <div id="webpage">
+        <h1>ESP32 FrSky Telemetry Hub</h1>
+        <h2>%hostname%</h3>
+            <form action=/ method=post>
+                <p>WiFi Settings</p>
+                <table>
+                    <tr>
+                        <th>
+                            <label for=wifiSSID>WiFi SSID</label>
+                            <br>
+                            <input type=text id=wifiSSID name=wifiSSID value=%wifiSSID%>
+                        </th>
+                        <th>
+                            <label for=wifiPassword>Password</label>
+                            <br>
+                            <input type=password id=wifiPassword name=wifiPassword value=%wifiPassword%>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for=hotspotSSID>Hotspot SSID </label>
+                            <br>
+                            <input type=text id=hotspotSSID name=hotspotSSID value=%hotspotSSID%>
+                        </th>
+                        <th>
+                            <label for=hotspotPassword>Password </label>
+                            <br>
+                            <input type=password id=hotspotPassword name=hotspotPassword value=%hotspotPassword%>
+                        </th>
+                    </tr>
+                </table>
+                <p>Active Sensors</p>
+                <table>
+                    <tr>
+                        <th>
+                            <input type=checkbox id=isSensorCurr name=isSensorCurr %isSensorCurr% value=checked>
+                            <label for=isSensorCurr>Current (Curr) </label>
+                        </th>
+                        <th>
+                            <input type=checkbox id=isSensorVFAS name=isSensorVFAS %isSensorVFAS% value=checked>
+                            <label for=isSensorVFAS>Battery Pack (VFAS) </label>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input type=checkbox id=isSensorFuel name=isSensorFuel %isSensorFuel% value=checked>
+                            <label for=isSensorFuel>Consumption (Fuel) </label>
+                        </th>
+                        <th>
+                            <input type=checkbox id=isSensorA3 name=isSensorA3 %isSensorA3% value=checked>
+                            <label for=isSensorA3>Battery (A3) </label>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input type=checkbox id=isSensorA4 name=isSensorA4 %isSensorA4% value=checked>
+                            <label for=isSensorA4>Battery (A4) </label>
+                        </th>
+                    </tr>
+                </table>
+                <p>Sensors Setup</p>
+                <table>
+                    <tr>
+                        <th>
+                            <b>Voltage Sensor</b>
+                            <br>
+                            <label for=voltsPerPoint>mVolts/point </label>
+                            <br>
+                            <input type=text id=voltsPerPoint name=voltsPerPoint value=%voltsPerPoint%>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                        </th>
+                        <th>
+                            <b>Current Sensor</b>
+                            <br>
+                            <label for=currVoltageRef>Voltage Reference (V) </label>
+                            <br>
+                            <input type=text id=currVoltageRef name=currVoltageRef value=%currVoltageRef%>
+                            <br>
+                            <label for=currSensitivity>Sensitivity (V/A) </label>
+                            <br>
+                            <input type=text id=currSensitivity name=currSensitivity value=%currSensitivity%>
+                            <br>
+                            <label for=currOffset>Offset(V) </label>
+                            <br>
+                            <input type=text id=currOffset name=currOffset value=%currOffset%>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Max Voltage: %maxVolts%V</th>
+                        <th>Max Amps: %maxAmps%A</th>
+                    </tr>
+                </table>
+                <input type=submit value=Save>
+            </form>
+    </div>
+</body>
+
+</html>

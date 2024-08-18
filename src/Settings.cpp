@@ -117,9 +117,9 @@ ArduinoSettings Settings::ReadEeprom()
         settings.sensorSettings.EnableSensorA4 = false;
         settings.sensorSettings.EnableSensorFuel = settings.sensorSettings.EnableSensorCURR;
         // settings.sensorSettings.AmpsPerPoint = MILLIAMPS_PER_POINT;
-        settings.sensorSettings.CurrVoltageRef = CURR_VOLT_REF;
-        settings.sensorSettings.CurrSensitivity = CURR_SENSITIVITY;
-        settings.sensorSettings.CurrOffset = CURR_OFFSET;
+        settings.CurrVoltageRef = CURR_VOLT_REF;
+        settings.CurrSensitivity = CURR_SENSITIVITY;
+        settings.CurrOffset = CURR_OFFSET;
         settings.sensorSettings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
     }
     else 

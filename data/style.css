@@ -1,0 +1,55 @@
+html {
+    font-family: Helvetica;
+    display: inline-block;
+    margin: 0px auto;
+    text-align: left;
+    background-color: deepskyblue;
+}
+
+h1 {
+    color: #444444;
+    margin: 50px auto 30px;
+    text-align: center
+}
+
+h2 {
+    text-align: center
+}
+
+h3 {
+    text-align: center
+}
+
+input {
+    background-color: lightgrey;
+}
+
+input[type=text] {
+    width: 85%;
+}
+
+input[type=password] {
+    width: 85%;
+}
+
+table {
+    width: 100%;
+}
+
+input[type=submit] {
+    background-color: darkblue;
+    width: 100%;
+    color: beige;
+    text-align: center
+}
+
+p {
+    font-size: 24px;
+    color: #444444;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+label {
+    font-size: 12px
+}

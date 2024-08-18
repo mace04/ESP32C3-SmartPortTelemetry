@@ -19,24 +19,21 @@ Reference to other projects and information:
 #include <Arduino.h>
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
     #include <WiFi.h>
-    #include <WebServer.h>
-    #include <ESPmDNS.h>
-    #include <WiFiUdp.h>
     #include <ArduinoOTA.h>
+    #include <ESPAsyncWebServer.h>
+    #include <SPIFFS.h>
 #endif
 #include <Settings.h>
 #include <SmartPort.h>
 
-void handle_OnGet();
-void handle_OnPost();
-void handle_NotFound();
-String SendHTML();
+String httpParamsHandle(const String &param);
+void httpPostAction(AsyncWebServerRequest *request);
 
 
 #define SERIAL_BAUD 115200
 
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
-WebServer server(80);
+    AsyncWebServer server(80);
 #endif
 SmartPort smartPort;
 bool wifiConnected = true;
@@ -126,9 +123,13 @@ void setup() {
     Serial.println();
 
     Serial.println("Starting up Management Web Server");
-    server.on("/", HTTPMethod::HTTP_GET, handle_OnGet);
-    server.on("/", HTTPMethod::HTTP_POST, handle_OnPost);
-    server.onNotFound(handle_NotFound);
+    // Route for root / web page
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+                { request->send(SPIFFS, "/index.html", String(), false, httpParamsHandle); });
+    // Route to load style.css file
+    server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
+                { request->send(SPIFFS, "/style.css", "text/css"); });
+    server.on("/", HTTP_POST, httpPostAction);
     server.begin();
     Serial.println("Management Web Server started");
   }
@@ -154,7 +155,6 @@ void loop() {
   if(wifiConnected)
   {
     ArduinoOTA.handle();
-    server.handleClient();
   }
 #else
   Settings::handle();
@@ -164,172 +164,174 @@ void loop() {
 }
 
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
-void handle_OnGet() {
- 
-//  Temperature = dht.readTemperature(); // Gets the values of the temperature
-//   Humidity = dht.readHumidity(); // Gets the values of the humidity 
-  server.send(200, "text/html", SendHTML()); 
-}
-
-void handle_OnPost() {
-  //TODO Set ALT settings
-  SensorSettings sensorSettings;
-
-  sensorSettings.EnableSensorCURR = server.arg("isSensorCurr") == "checked" ? true : false;
-  sensorSettings.EnableSensorVFAS = server.arg("isSensorVFAS") == "checked" ? true : false;
-  sensorSettings.EnableSensorA3 = server.arg("isSensorA3") == "checked" ? true : false;
-  sensorSettings.EnableSensorA4 = server.arg("isSensorA4") == "checked" ? true : false;
-  sensorSettings.EnableSensorFuel = server.arg("isSensorFuel") == "checked" ? true : false;
-  sensorSettings.VoltsPerPoint = server.arg("voltsPerPoint").toFloat();
-//   sensorSettings.AmpsPerPoint = server.arg("ampsPerPoint").toFloat();
-  sensorSettings.CurrVoltageRef = server.arg("currVoltageRef").toFloat();
-  sensorSettings.CurrSensitivity = server.arg("currSensitivity").toFloat();
-  sensorSettings.CurrOffset = server.arg("currOffset").toFloat();
-
-  Settings::SetSensorSettings(sensorSettings);
-
-  WiFiSettings wifiSettings;
-  wifiSettings.WiFiSSID = server.arg("wifiSSID");
-  wifiSettings.WiFiPassword = server.arg("wifiPassword");
-  wifiSettings.HotspotSSID = server.arg("hotspotSSID");
-  wifiSettings.HotspotPassword = server.arg("hotspotPassword");
-  Settings::SetWiFiSettings(wifiSettings);
-
-  server.send(200, "text/html", SendHTML()); 
-}
-
-void handle_NotFound(){
-  server.send(404, "text/plain", "Not found");
-}
-
-String SendHTML()
+String httpParamsHandle(const String &param)
 {
-  //TODO Display ALT sensor and settings
-  char ptr1[8];
-  char ptr2[6];
-  SensorSettings sensors = Settings::GetSensorSettings();
-  SmartPortSettings sport = Settings::GetSmartPortSettings();
-  WiFiSettings wifi = Settings::GetWiFiSettings();
-  String ptr = "<!DOCTYPE html> <html>\n";
-  ptr += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  ptr += "<title>ESP32 Webserver</title>\n";
-  ptr += "<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: left; background-color: deepskyblue;}\n";
-    ptr += "h1 {color: #444444;margin: 50px auto 30px; text-align: center}\n";
-    ptr += "h2 {text-align: center}\n";
-    ptr += "h3 {text-align: center}\n";
-    ptr += "input{background-color:lightgrey;}\n";
-    ptr += "input[type=text]{width: 85%;}\n";
-    ptr += "input[type=password]{width: 85%;}\n";
-    ptr += "table {width: 100%;}\n";
-    ptr += "input[type=submit]{background-color:darkblue; width:100%; color: beige; text-align: center}\n";
-    ptr += "p {font-size: 24px;color: #444444;margin-bottom: 10px; font-weight: bold;}\n";
-    ptr += "label {font-size: 12px}";
-  ptr += "</style>\n";
-  ptr += "</head>\n";
-  ptr += "<body>\n";
-  ptr += "<div id=\"webpage\">\n";
-  ptr += "<h1>ESP32 FrSky Telemetry Hub</h1>\n";
-  // ptr += "<h2>Sensor Settings</h2>\n";
-  ptr += "<h2>" +  String(WiFi.getHostname()) + "</h3>\n";
+    if (param == "hostname")
+    {
+        return String(WiFi.getHostname());
+    }
+    if (param == "wifiSSID")
+    {
+        return Settings::GetWiFiSettings().WiFiSSID;
+    }
+    if (param == "wifiPassword")
+    {
+        return Settings::GetWiFiSettings().WiFiPassword;
+    }
+    if (param == "hotspotSSID")
+    {
+        return Settings::GetWiFiSettings().HotspotSSID;
+    }
+    if (param == "hotspotPassword")
+    {
+        return Settings::GetWiFiSettings().HotspotPassword;
+    }
+    if (param == "isSensorCurr")
+    {
+        return Settings::GetSensorSettings().EnableSensorCURR ? "CHECKED" : "";
+    }
+    if (param == "isSensorVFAS")
+    {
+        return Settings::GetSensorSettings().EnableSensorVFAS ? "CHECKED" : "";
+    }
+    if (param == "isSensorFuel")
+    {
+        return Settings::GetSensorSettings().EnableSensorFuel ? "CHECKED" : "";
+    }
+    if (param == "isSensorA3")
+    {
+        return Settings::GetSensorSettings().EnableSensorA3 ? "CHECKED" : "";
+    }
+    if (param == "isSensorA4")
+    {
+        return Settings::GetSensorSettings().EnableSensorA4 ? "CHECKED" : "";
+    }
+    if (param == "voltsPerPoint")
+    {
+        char ptr[8];
+        dtostrf(Settings::GetSensorSettings().VoltsPerPoint, 8, 4, ptr);
+        return String(ptr);
+    }
+    if (param == "currVoltageRef")
+    {
+        char ptr[8];
+        dtostrf(Settings::GetSensorSettings().CurrVoltageRef, 8, 4, ptr);
+        return String(ptr);
+    }
+    if (param == "currSensitivity")
+    {
+        char ptr[8];
+        dtostrf(Settings::GetSensorSettings().CurrSensitivity, 8, 4, ptr);
+        return String(ptr);
+    }
+    if (param == "currOffset")
+    {
+        char ptr[8];
+        dtostrf(Settings::GetSensorSettings().CurrOffset, 8, 4, ptr);
+        return String(ptr);
+    }
+    if (param == "maxVolts")
+    {
+        char ptr[8];
+        dtostrf(Settings::GetSensorSettings().VoltsPerPoint / 1000.00 * 4095.00, 6, 2, ptr);
+        return String(ptr);
+    }
+    if (param == "maxAmps")
+    {
+        char ptr[8];
+        dtostrf((Settings::GetSensorSettings().CurrVoltageRef - Settings::GetSensorSettings().CurrOffset) / Settings::GetSensorSettings().CurrSensitivity, 6, 2, ptr);
+        return String(ptr);
+    }
+    return "";
+}
 
-  ptr += "<form action=""/"" method=""post"">\n";
-      ptr += "<p>WiFi Settings</p>\n";
-      ptr += "<table>\n";
-          ptr += "<tr>\n";
-            ptr += "<th><label for=""wifiSSID"">WiFi SSID </label><br><input type=""text"" id=""wifiSSID"" name=""wifiSSID"" value="" ";
-              ptr += wifi.WiFiSSID;
-              ptr += """></th>\n";          
-            ptr += "<th><label for=""wifiPassword"">Password </label><br><input type=""password"" id=""wifiPassword"" name=""wifiPassword"" value="" ";
-              ptr += wifi.WiFiPassword;
-              ptr += """></th>\n";          
-          ptr += "</tr>\n";
-          ptr += "<tr>\n";
-            ptr += "<th><label for=""hotspotSSID"">Hotspot SSID </label><br><input type=""text"" id=""hotspotSSID"" name=""hotspotSSID"" value="" ";
-              ptr += wifi.HotspotSSID;
-              ptr += """></th>\n";          
-            ptr += "<th><label for=""hotspotPassword"">Password </label><br><input type=""password"" id=""hotspotPassword"" name=""hotspotPassword"" value="" ";
-              ptr += wifi.HotspotPassword;
-              ptr += """></th>\n";          
-          ptr += "</tr>\n";
-      ptr += "</table>\n";
-      ptr += "<p>Active Sensors</p>\n";
-      ptr += "<table>\n";
-          ptr += "<tr>\n";
-              ptr += "<th><input type=""checkbox"" id=""isSensorCurr"" name=""isSensorCurr"" ";
-                ptr += sensors.EnableSensorCURR ? "CHECKED ": " ";
-                ptr += "value=""checked""><label for=""isSensorCurr"">Current (Curr) </label></th>\n";
-              ptr += "<th><input type=""checkbox"" id=""isSensorVFAS"" name=""isSensorVFAS"" ";
-                ptr += sensors.EnableSensorVFAS ? "CHECKED ": " ";
-                ptr += "value=""checked""><label for=""isSensorVFAS"">Battery Pack (VFAS) </label></th>\n";
-          ptr += "</tr>\n";
-          ptr += "<tr>\n";
-              ptr += "<th><input type=""checkbox"" id=""isSensorFuel"" name=""isSensorFuel"" ";
-                ptr += sensors.EnableSensorFuel ? "CHECKED ": " ";
-                ptr += "value=""checked""><label for=""isSensorFuel"">Consumption (Fuel) </label></th>\n";
-              ptr += "<th><input type=""checkbox"" id=""isSensorA3"" name=""isSensorA3"" ";
-                ptr += sensors.EnableSensorA3 ? "CHECKED ": " ";
-                ptr += "value=""checked""><label for=""isSensorA3"">Battery (A3) </label></th>\n";
-          ptr += "</tr>\n";
-          ptr += "<tr>\n";
-              ptr += "<th><input type=""checkbox"" id=""isSensorA4"" name=""isSensorA4"" ";
-                ptr += sensors.EnableSensorA4 ? "CHECKED ": " ";
-                ptr += "value=""checked""><label for=""isSensorA4"">Battery (A4) </label></th>\n";
-          ptr += "</tr>\n";
-      ptr += "</table>\n";
-      ptr += "<p>Sensors Setup</p>\n";
-      ptr += "<table>\n";
-          ptr += "<tr>\n";
-                ptr += "<th>";
-                    ptr += "<b>Voltage Sensor</b>";
-                    ptr += "<br>\n";
-                    ptr += "<label for=""voltsPerPoint"">mVolts/point </label><br><input type=""text"" id=""voltsPerPoint"" name=""voltsPerPoint"" value=""";
-                    dtostrf(sensors.VoltsPerPoint,8, 4, ptr1);
-                    ptr += String(ptr1);
-                    ptr += """>";
-                    ptr += "<br>\n";
-                    ptr += "<br>\n";
-                    ptr += "<br>\n";
-                    ptr += "<br>\n";
-                    ptr += "<br>\n";
-                ptr += "</th>\n";
-                ptr += "<th>";
-                    ptr += "<b>Current Sensor</b>";
-                    ptr += "<br>\n";
-                    ptr += "<label for=""currVoltageRef"">Voltage Reference (V) </label><br><input type=""text"" id=""currVoltageRef"" name=""currVoltageRef"" value=""";
-                    dtostrf(sensors.CurrVoltageRef,8, 4, ptr1);
-                    ptr += String(ptr1);
-                    ptr += """>";
-                    ptr += "<br>\n";
-                    ptr += "<label for=""currSensitivity"">Sensitivity (V/A) </label><br><input type=""text"" id=""currSensitivity"" name=""currSensitivity"" value=""";
-                    dtostrf(sensors.CurrSensitivity,8, 4, ptr1);
-                    ptr += String(ptr1);
-                    ptr += """>";
-                    ptr += "<br>\n";
-                    ptr += "<label for=""currOffset"">Offset(V) </label><br><input type=""text"" id=""currOffset"" name=""currOffset"" value=""";
-                    dtostrf(sensors.CurrOffset,8, 4, ptr1);
-                    ptr += String(ptr1);
-                    ptr += """>";
-                ptr += "</th>\n";
-          ptr += "</tr>\n";
-          ptr += "<tr>\n";
-            ptr += "<th>Max Voltage:";
-              dtostrf(sensors.VoltsPerPoint / 1000.00 * 4095.00, 6, 2, ptr2);
-              ptr += ptr2;
-              ptr += "V</th>";
-            ptr += "<th>Max Amps:";
-              dtostrf((sensors.CurrVoltageRef - sensors.CurrOffset) / sensors.CurrSensitivity, 6, 2, ptr2);
-              ptr += ptr2;
-              ptr += "A</th>";
-          ptr += "</tr>\n";
-      ptr += "</table>\n";
-      ptr += "<input type=""submit"" value=""Save"">\n";
-  ptr += "</form>\n";
-    
-  ptr += "</div>\n";
-  ptr += "</body>\n";
-  ptr += "</html>\n";
+void httpPostAction(AsyncWebServerRequest *request)
+{
+    Serial.println("ACTION!");
 
-  return ptr;
+    WiFiSettings wifiSettings;
+    bool isWifiSettings = false;
+    SensorSettings sensorSettings;
+    bool isSensorSettings = false;
 
+    int params = request->params();
+    for (int i = 0; i < params; i++)
+    {
+        AsyncWebParameter *p = request->getParam(i);
+        Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+
+        if (p->name() == "wifiSSID")
+        {
+            wifiSettings.WiFiSSID = p->value();
+            isWifiSettings = true;
+        }
+        if (p->name() == "wifiPassword")
+        {
+            wifiSettings.WiFiPassword = p->value();
+            isWifiSettings = true;
+        }
+        if (p->name() == "hotspotSSID")
+        {
+            wifiSettings.HotspotSSID = p->value();
+            isWifiSettings = true;
+        }
+        if (p->name() == "hotspotPassword")
+        {
+            wifiSettings.HotspotPassword = p->value();
+            isWifiSettings = true;
+        }
+
+        if (p->name() == "isSensorCurr")
+        {
+            sensorSettings.EnableSensorCURR = true;
+            isSensorSettings = true;
+        }
+        if (p->name() == "isSensorVFAS")
+        {
+            sensorSettings.EnableSensorVFAS = true;
+            isSensorSettings = true;
+        }
+        if (p->name() == "isSensorFuel")
+        {
+            sensorSettings.EnableSensorFuel = true;
+            isSensorSettings = true;
+        }
+        if (p->name() == "isSensorA3")
+        {
+            sensorSettings.EnableSensorA3 = true;
+            isSensorSettings = true;
+        }
+        if (p->name() == "isSensorA4")
+        {
+            sensorSettings.EnableSensorA4 = true;
+            isSensorSettings = true;
+        }
+        if (p->name() == "voltsPerPoint")
+        {
+            sensorSettings.VoltsPerPoint = p->value().toFloat();
+            isSensorSettings = true;
+        }
+        if (p->name() == "currVoltageRef")
+        {
+            sensorSettings.CurrVoltageRef = p->value().toFloat();
+            isSensorSettings = true;
+        }
+        if (p->name() == "currSensitivity")
+        {
+            sensorSettings.CurrSensitivity = p->value().toFloat();
+            isSensorSettings = true;
+        }
+        if (p->name() == "currOffset")
+        {
+            sensorSettings.CurrOffset = p->value().toFloat();
+            isSensorSettings = true;
+        }
+    }
+    if (isSensorSettings)
+        Settings::SetSensorSettings(sensorSettings);
+    if (isWifiSettings)
+        Settings::SetWiFiSettings(wifiSettings);
+
+    request->send(SPIFFS, "/index.html", String(), false, httpParamsHandle);
 }
 #endif
