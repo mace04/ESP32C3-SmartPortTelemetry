@@ -10,8 +10,9 @@
 </head>
 
 <body>
+    <script src="index.js"></script>
     <div id="webpage">
-        <h1>ESP32 FrSky Telemetry Hub</h1>
+        <h1>FrSky Telemetry Hub</h1>
         <h2>%hostname%</h3>
             <form action=/ method=post>
                 <p>WiFi Settings</p>
@@ -45,12 +46,26 @@
                 <table>
                     <tr>
                         <th>
-                            <input type=checkbox id=isSensorCurr name=isSensorCurr %isSensorCurr% value=checked>
-                            <label for=isSensorCurr>Current (Curr) </label>
+                            <label for=currentSensorPin>Current (Curr)</label><br>                    
+                            <input type=checkbox id=isSensorCurr name=isSensorCurr %isSensorCurr% value=checked onclick="toggleSensor('isSensorCurr', 'currentSensorPin');">
+                            <input type=number class="pin" id=currentSensorPin name=currentSensorPin value=%currentSensorPin%>
                         </th>
                         <th>
-                            <input type=checkbox id=isSensorVFAS name=isSensorVFAS %isSensorVFAS% value=checked>
-                            <label for=isSensorVFAS>Battery Pack (VFAS) </label>
+                            <label for=isSensorVFAS>Battery Pack (VFAS) </label><br> 
+                            <input type=checkbox id=isSensorVFAS name=isSensorVFAS %isSensorVFAS% value=checked onclick="toggleSensor('isSensorVFAS', 'vfasSensorPin');">
+                            <input type=number class="pin" id=vfasSensorPin name=vfasSensorPin value=%vfasSensorPin%>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for=isSensorA3>Battery (A3) </label><br>
+                            <input type=checkbox id=isSensorA3 name=isSensorA3 %isSensorA3% value=checked onclick="toggleSensor('isSensorA3', 'a3SensorPin');">
+                            <input type=number class="pin" id=a3SensorPin name=a3SensorPin value=%a3SensorPin% >
+                        </th>
+                        <th>
+                            <label for=isSensorA4>Battery (A4) </label><br>
+                            <input type=checkbox id=isSensorA4 name=isSensorA4 %isSensorA4% value=checked onclick="toggleSensor('isSensorA4', 'a4SensorPin');">
+                            <input type=number class="pin" id=a4SensorPin name=a4SensorPin value=%a4SensorPin%>
                         </th>
                     </tr>
                     <tr>
@@ -58,18 +73,7 @@
                             <input type=checkbox id=isSensorFuel name=isSensorFuel %isSensorFuel% value=checked>
                             <label for=isSensorFuel>Consumption (Fuel) </label>
                         </th>
-                        <th>
-                            <input type=checkbox id=isSensorA3 name=isSensorA3 %isSensorA3% value=checked>
-                            <label for=isSensorA3>Battery (A3) </label>
-                        </th>
-                    </tr>
-                    <tr>
-                        <th>
-                            <input type=checkbox id=isSensorA4 name=isSensorA4 %isSensorA4% value=checked>
-                            <label for=isSensorA4>Battery (A4) </label>
-                        </th>
-                    </tr>
-                </table>
+                    </tr>                </table>
                 <p>Sensors Setup</p>
                 <table>
                     <tr>
@@ -78,7 +82,7 @@
                             <br>
                             <label for=voltsPerPoint>mVolts/point </label>
                             <br>
-                            <input type=text id=voltsPerPoint name=voltsPerPoint value=%voltsPerPoint%>
+                            <input type=text class=decimal id=voltsPerPoint name=voltsPerPoint value=%voltsPerPoint%>
                             <br>
                             <br>
                             <br>
@@ -90,15 +94,15 @@
                             <br>
                             <label for=currVoltageRef>Voltage Reference (V) </label>
                             <br>
-                            <input type=text id=currVoltageRef name=currVoltageRef value=%currVoltageRef%>
+                            <input type=text class=decimal id=currVoltageRef name=currVoltageRef value=%currVoltageRef%>
                             <br>
                             <label for=currSensitivity>Sensitivity (V/A) </label>
                             <br>
-                            <input type=text id=currSensitivity name=currSensitivity value=%currSensitivity%>
+                            <input type=text class=decimal id=currSensitivity name=currSensitivity value=%currSensitivity%>
                             <br>
                             <label for=currOffset>Offset(V) </label>
                             <br>
-                            <input type=text id=currOffset name=currOffset value=%currOffset%>
+                            <input type=text class=decimal id=currOffset name=currOffset value=%currOffset%>
                         </th>
                     </tr>
                     <tr>
@@ -106,9 +110,38 @@
                         <th>Max Amps: %maxAmps%A</th>
                     </tr>
                 </table>
+                <p>Smartport Telemetry Setup</p>
+                <table>
+                    <tr>
+                        <th>
+                            <label for=smartportRxPin>Receive Pin </label><br>                    
+                            <input type=number class="pin" id=smartportRxPin name=smartportRxPin value=%smartportRxPin%>                 
+                        </th>
+                        <th>
+                            <label for=smartportTxPin>Transmit Pin </label><br>                    
+                            <input type=number class="pin" id=smartportTxPin name=smartportTxPin value=%smartportTxPin%>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for=smartportRefreshRate>Refresh Rate(ms)</label><br>                    
+                            <input type=number class=decimal id=smartportRefreshRate name=smartportRefreshRate value=%smartportRefreshRate%>
+                        </th>
+                        <th>
+                            <br>
+                            <input type=checkbox id=smartReverseSignal name=smartReverseSignal %smartReverseSignal% value=checked>
+                            <label for=smartReverseSignal>Reverse signal</label>
+                        </th>
+                    </tr>
+                </table>
                 <input type=submit value=Save>
             </form>
     </div>
 </body>
+<footer>
+    <script type="text/javascript">
+        defaultInputStates();
+      </script>
+</footer>
 
 </html>

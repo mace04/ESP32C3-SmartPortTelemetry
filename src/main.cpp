@@ -26,14 +26,12 @@ Reference to other projects and information:
 #include <Settings.h>
 #include <SmartPort.h>
 
-String httpParamsHandle(const String &param);
-void httpPostAction(AsyncWebServerRequest *request);
-
-
 #define SERIAL_BAUD 115200
 
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
     AsyncWebServer server(80);
+    String httpParamsHandle(const String &param);
+    void httpPostAction(AsyncWebServerRequest *request);
 #endif
 SmartPort smartPort;
 bool wifiConnected = true;
@@ -43,9 +41,8 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(SERIAL_BAUD);
 
-  // nvs_flash_erase(); // erase the NVS partition and...
-  // nvs_flash_init(); // initialize the NVS partition.
-  // while(true);
+//   Serial.println("Reseting memory.");
+//   Settings::Reset();
 
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
   unsigned long wifiConnectionTime;
@@ -122,6 +119,17 @@ void setup() {
     Serial.println("OTA Setup completed");
     Serial.println();
 
+    // Initialize SPIFFS
+    if (!SPIFFS.begin(true))
+    {
+        Serial.println("An Error has occurred while mounting SPIFFS");
+        return;
+    }    
+    else
+    {
+        Serial.println("Filesystem mounted successfully.");
+    }
+
     Serial.println("Starting up Management Web Server");
     // Route for root / web page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -129,6 +137,8 @@ void setup() {
     // Route to load style.css file
     server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
                 { request->send(SPIFFS, "/style.css", "text/css"); });
+    server.on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request)
+                { request->send(SPIFFS, "/index.js", String()); });
     server.on("/", HTTP_POST, httpPostAction);
     server.begin();
     Serial.println("Management Web Server started");
@@ -137,14 +147,6 @@ void setup() {
   // Register sensors
   smartPort.Begin();
 
-  // Serial.println("Initialis NVS");
-  // nvs_flash_erase(); // erase the NVS partition and...
-  // nvs_flash_init(); // initialize the NVS partition.
-    // Preferences smartportSettings;
-    // Preferences sensorSettings;
-    // smartportSettings.begin(SPORT_STORAGE_SPACE, false);
-    // sensorSettings.begin(SENSORS_STORAGE_SPACE, false);
-  // Get baseline readings
   Serial.println("Initialise Completed...");
 }
 
@@ -190,9 +192,17 @@ String httpParamsHandle(const String &param)
     {
         return Settings::GetSensorSettings().EnableSensorCURR ? "CHECKED" : "";
     }
+    if (param == "currentSensorPin")
+    {
+        return String(Settings::GetSensorSettings().CurrSensorPin);
+    }
     if (param == "isSensorVFAS")
     {
         return Settings::GetSensorSettings().EnableSensorVFAS ? "CHECKED" : "";
+    }
+    if (param == "vfasSensorPin")
+    {
+        return String(Settings::GetSensorSettings().VfasSensorPin);
     }
     if (param == "isSensorFuel")
     {
@@ -202,9 +212,17 @@ String httpParamsHandle(const String &param)
     {
         return Settings::GetSensorSettings().EnableSensorA3 ? "CHECKED" : "";
     }
+    if (param == "a3SensorPin")
+    {
+        return String(Settings::GetSensorSettings().A3SensorPin);
+    }
     if (param == "isSensorA4")
     {
         return Settings::GetSensorSettings().EnableSensorA4 ? "CHECKED" : "";
+    }
+    if (param == "a4SensorPin")
+    {
+        return String(Settings::GetSensorSettings().A4SensorPin);
     }
     if (param == "voltsPerPoint")
     {
@@ -242,17 +260,37 @@ String httpParamsHandle(const String &param)
         dtostrf((Settings::GetSensorSettings().CurrVoltageRef - Settings::GetSensorSettings().CurrOffset) / Settings::GetSensorSettings().CurrSensitivity, 6, 2, ptr);
         return String(ptr);
     }
+    if (param == "smartportRxPin")
+    {
+        Serial.printf("GET[%s]:%s\n", param.c_str(), String(Settings::GetSmartPortSettings().RxPin));
+        return String(Settings::GetSmartPortSettings().RxPin);
+    }
+    if (param == "smartportTxPin")
+    {
+        Serial.printf("GET[%s]:%s\n", param.c_str(), String(Settings::GetSmartPortSettings().TxPin));
+        return String(Settings::GetSmartPortSettings().TxPin);
+    }
+    if (param == "smartportRefreshRate")
+    {
+        Serial.printf("GET[%s]:%s\n", param.c_str(), String(Settings::GetSmartPortSettings().RefreshRate));
+        return String(Settings::GetSmartPortSettings().RefreshRate);
+    }
+    if (param == "smartReverseSignal")
+    {
+        Serial.printf("GET[%s]:%s\n", param.c_str(), String(Settings::GetSmartPortSettings().Inverted));
+        return Settings::GetSmartPortSettings().Inverted ? "CHECKED" : "";
+    }
     return "";
 }
 
 void httpPostAction(AsyncWebServerRequest *request)
 {
-    Serial.println("ACTION!");
-
     WiFiSettings wifiSettings;
     bool isWifiSettings = false;
     SensorSettings sensorSettings;
     bool isSensorSettings = false;
+    SmartPortSettings spSettings;
+    bool isSmartportSettings = false;
 
     int params = request->params();
     for (int i = 0; i < params; i++)
@@ -286,9 +324,19 @@ void httpPostAction(AsyncWebServerRequest *request)
             sensorSettings.EnableSensorCURR = true;
             isSensorSettings = true;
         }
+        if (p->name() == "currentSensorPin")
+        {
+            sensorSettings.CurrSensorPin = p->value().toInt();
+            isSensorSettings = true;
+        }
         if (p->name() == "isSensorVFAS")
         {
             sensorSettings.EnableSensorVFAS = true;
+            isSensorSettings = true;
+        }
+        if (p->name() == "vfasSensorPin")
+        {
+            sensorSettings.VfasSensorPin = p->value().toInt();
             isSensorSettings = true;
         }
         if (p->name() == "isSensorFuel")
@@ -301,9 +349,19 @@ void httpPostAction(AsyncWebServerRequest *request)
             sensorSettings.EnableSensorA3 = true;
             isSensorSettings = true;
         }
+        if (p->name() == "a3SensorPin")
+        {
+            sensorSettings.A3SensorPin = p->value().toInt();
+            isSensorSettings = true;
+        }
         if (p->name() == "isSensorA4")
         {
             sensorSettings.EnableSensorA4 = true;
+            isSensorSettings = true;
+        }
+        if (p->name() == "a4SensorPin")
+        {
+            sensorSettings.A4SensorPin = p->value().toInt();
             isSensorSettings = true;
         }
         if (p->name() == "voltsPerPoint")
@@ -326,11 +384,34 @@ void httpPostAction(AsyncWebServerRequest *request)
             sensorSettings.CurrOffset = p->value().toFloat();
             isSensorSettings = true;
         }
+        if (p->name() == "smartportRxPin")
+        {
+            spSettings.RxPin = p->value().toInt();
+            isSmartportSettings = true;
+        }
+        if (p->name() == "smartportTxPin")
+        {
+            spSettings.TxPin = p->value().toInt();
+            isSmartportSettings = true;
+        }
+        if (p->name() == "smartportRefreshRate")
+        {
+            spSettings.RefreshRate = p->value().toInt();
+            isSmartportSettings = true;
+        }
+        if (p->name() == "smartReverseSignal")
+        {
+            spSettings.Inverted = p->value().toInt();
+            isSmartportSettings = true;
+        }
+
     }
     if (isSensorSettings)
         Settings::SetSensorSettings(sensorSettings);
     if (isWifiSettings)
         Settings::SetWiFiSettings(wifiSettings);
+    if (isSmartportSettings)
+        Settings::SetSmartPortSettings(spSettings);
 
     request->send(SPIFFS, "/index.html", String(), false, httpParamsHandle);
 }

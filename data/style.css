@@ -28,6 +28,13 @@ input[type=text] {
     width: 85%;
 }
 
+input.decimal {
+    width: 55px;
+}
+input.pin[type=number]{
+    width: 35px;
+}
+
 input[type=password] {
     width: 85%;
 }
