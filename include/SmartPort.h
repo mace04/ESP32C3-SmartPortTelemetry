@@ -46,7 +46,7 @@ class SmartPort
 {
     public:
         SmartPort();
-        void Begin(uint8_t rxPin = D7, uint8_t txPin = D6, bool inverted = false);
+        void Begin();
         bool IsRegistered(uint16_t sensorId);
         void Hanlde();
         void RefreshSettings(bool SmartPortRefresh, bool SensorRefresh);

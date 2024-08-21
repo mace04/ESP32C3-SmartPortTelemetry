@@ -61,17 +61,17 @@ float Sensors::ReadSensor(uint16_t sensorId)
 	switch(sensorId)
 	{
 		case SENSOR_VFAS:
-			return this->GetVoltage(PIN_VFAS);
+			return this->GetVoltage(settings.VfasSensorPin);
 		case SENSOR_CURR:
 			current = this->GetCurrent();
 			return current;
 		case SENSOR_FUEL:
 			return this->GetPowerConsumption();
 		case SENSOR_A3:
-			return this->GetVoltage(PIN_A3);
+			return this->GetVoltage(settings.A3SensorPin);
 #ifndef ARDUINO_XIAO_ESP32C3
 		case SENSOR_A4:
-			return GetVoltage(PIN_A4);
+			return GetVoltage(settings.A4SensorPin);
 #endif			
 		case SENSOR_ALT: //TODO Read ALT sensor
 			return -1;
@@ -157,7 +157,7 @@ float Sensors::GetCurrent() {
 
 	if (isSensorCurr) {
 		for (i = 0; i < SAMPLE_RATES; i++) {
-			val += analogRead(PIN_CURR);// *MAX_CURRENT * 10.00 / 750.00;
+			val += analogRead(settings.CurrSensorPin);// *MAX_CURRENT * 10.00 / 750.00;
 			delayMicroseconds(SAMPLE_DELAY_MS);
 		}
 #ifdef _TEST_VALUES_
@@ -214,33 +214,25 @@ float Sensors::GetVoltage(int pin) {
 
 	String sensorName, pinName;
 	unsigned int previousValue;
-	switch (pin) {
-	case PIN_VFAS:
-		vpp = Settings::GetSensorSettings().VoltsPerPoint;
-		sensorName = "VFAS:";
-		pinName = "PIN_VFAS(A1):";
-		previousValue = lastReadings.vfas;
-		break;
-	case PIN_A3:
+	if (pin == settings.A3SensorPin){
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		sensorName = "A3:";
 		pinName = "PIN_A3(A2):";
 		previousValue = lastReadings.a3;
-		break;
+	}
 #if !defined(ARDUINO_XIAO_ESP32C3) && !defined(ESP32)
-	case PIN_A4:
+    else  if (pin == settings.A4SensorPin){
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		sensorName = "A4:";
 		pinName = "PIN_A4(A3):";
 		previousValue = lastReadings.a4;
-		break;
+    }
 #endif
-	default:
+	else{
 		vpp = Settings::GetSensorSettings().VoltsPerPoint;
 		sensorName = "VFAS:";
 		pinName = "PIN_VFAS(A1):";
 		previousValue = lastReadings.vfas;
-		break;
 	}
 	// Calculate tolerancde of +-2 points. if within tolerance use previous reading
 	if(val/SAMPLE_RATES > previousValue + (2) || val/SAMPLE_RATES < previousValue - (2))

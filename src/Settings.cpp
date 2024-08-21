@@ -6,14 +6,35 @@ SmartPortSettings Settings::GetSmartPortSettings()
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
     Preferences settingsPreferences;
     if(!settingsPreferences.begin(SPORT_STORAGE_SPACE, true))
-        Serial.println("Error initialising NVS for Sensors");
-    settings.BaudRate = settingsPreferences.getInt("baudRate", SPORT_BAUD);
-    settings.RefreshRate = settingsPreferences.getInt("refreshRate", SPORT_REFRESH_RATE);
+        Serial.println("Error initialising NVS for SmartPort Telemetry");
+    settings.BaudRate = settingsPreferences.getUInt("baudRate", SPORT_BAUD);
+    settings.RefreshRate = settingsPreferences.getUInt("refreshRate", SPORT_REFRESH_RATE);
+    settings.RxPin = settingsPreferences.getUInt("rxPin");
+    settings.TxPin = settingsPreferences.getUInt("txPin");
     settingsPreferences.end();
 #else
     settings = ReadEeprom().smartPortSettings;
 #endif
     return settings;
+}
+
+void Settings::SetSmartPortSettings(SmartPortSettings settings)
+{
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
+    Preferences settingsPreferences;
+    if(!settingsPreferences.begin(SPORT_STORAGE_SPACE, false))
+        Serial.println("Error initialising NVS for SmartPort Telemetry");
+	
+    settingsPreferences.putUInt("baudRate", settings.BaudRate);
+    settingsPreferences.putUInt("refreshRate", settings.RefreshRate);
+    settingsPreferences.putUInt("rxPin", settings.RxPin);
+    settingsPreferences.putUInt("txPin", settings.TxPin);
+    settingsPreferences.end();
+#else
+    ArduinoSettings fullSettings = ReadEeprom();
+    fullSettings.smartPortSettings = settings;
+    WriteEeprom(fullSettings);
+#endif
 }
 
 SensorSettings Settings::GetSensorSettings() 
@@ -31,7 +52,10 @@ SensorSettings Settings::GetSensorSettings()
     settings.EnableSensorA3 = settingsPreferences.getBool("enableA3", false);
     settings.EnableSensorA4 = settingsPreferences.getBool("enableA4", false);
     settings.EnableSensorFuel = settingsPreferences.getBool("enableFuel", false);
-    // settings.AmpsPerPoint = settingsPreferences.getDouble("mapp", MILLIAMPS_PER_POINT);
+    settings.CurrSensorPin = settingsPreferences.getUInt("CurrSensorPin");
+    settings.VfasSensorPin = settingsPreferences.getUInt("VfasSensorPin");
+    settings.A3SensorPin = settingsPreferences.getUInt("A3SensorPin");
+    settings.A4SensorPin = settingsPreferences.getUInt("A4SensorPin");
     settings.CurrVoltageRef = settingsPreferences.getDouble("vref", CURR_VOLT_REF);
     settings.CurrSensitivity = settingsPreferences.getDouble("mvpa", CURR_SENSITIVITY);
     settings.CurrOffset = settingsPreferences.getDouble("offset", CURR_OFFSET);
@@ -59,7 +83,10 @@ void Settings::SetSensorSettings(SensorSettings settings)
     settingsPreferences.putBool("enableA3", settings.EnableSensorA3);
     settingsPreferences.putBool("enableA4", settings.EnableSensorA4);
     settingsPreferences.putBool("enableFuel", settings.EnableSensorFuel);
-    // settingsPreferences.putDouble("mapp", settings.AmpsPerPoint);
+    settingsPreferences.putUInt("CurrSensorPin", settings.CurrSensorPin);
+    settingsPreferences.putUInt("VfasSensorPin", settings.VfasSensorPin);
+    settingsPreferences.putUInt("A3SensorPin", settings.A3SensorPin);
+    settingsPreferences.putUInt("A4SensorPin", settings.A4SensorPin);
     settingsPreferences.putDouble("vref", settings.CurrVoltageRef);
     settingsPreferences.putDouble("mvpa", settings.CurrSensitivity);
     settingsPreferences.putDouble("offset", settings.CurrOffset);
@@ -116,10 +143,13 @@ ArduinoSettings Settings::ReadEeprom()
         settings.sensorSettings.EnableSensorA3 = false;
         settings.sensorSettings.EnableSensorA4 = false;
         settings.sensorSettings.EnableSensorFuel = settings.sensorSettings.EnableSensorCURR;
-        // settings.sensorSettings.AmpsPerPoint = MILLIAMPS_PER_POINT;
-        settings.CurrVoltageRef = CURR_VOLT_REF;
-        settings.CurrSensitivity = CURR_SENSITIVITY;
-        settings.CurrOffset = CURR_OFFSET;
+        settings.sensorSettings.CurrSensorPin = 0;
+        settings.sensorSettings.VfasSensorPin = 0;
+        settings.sensorSettings.A3SensorPin = 0;
+        settings.sensorSettings.A4SensorPin = 0;
+        settings.sensorSettings.CurrVoltageRef = CURR_VOLT_REF;
+        settings.sensorSettings.CurrSensitivity = CURR_SENSITIVITY;
+        settings.sensorSettings.CurrOffset = CURR_OFFSET;
         settings.sensorSettings.VoltsPerPoint = MILLIVOLTS_PER_POINT;
     }
     else 
@@ -146,10 +176,14 @@ void Settings::handle()
             ArduinoSettings settings = ReadEeprom();
             Serial << "SMARTPORT," << settings.smartPortSettings.BaudRate << "," << settings.smartPortSettings.RefreshRate << endl;
             Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
+                << settings.sensorSettings.CurrSensorPin << ","
                 << settings.sensorSettings.EnableSensorVFAS << ","
+                << settings.sensorSettings.VfasSensorPin << ","
                 << settings.sensorSettings.EnableSensorFuel << ","
                 << settings.sensorSettings.EnableSensorA3 << ","
+                << settings.sensorSettings.A3SensorPin << ","
                 << settings.sensorSettings.EnableSensorA4 << ","
+                << settings.sensorSettings.A4SensorPin << ","
                 // << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
                 << _FLOAT(settings.sensorSettings.CurrVoltageRef, 6) << ","
                 << _FLOAT(settings.sensorSettings.CurrSensitivity, 6) << ","
@@ -168,21 +202,28 @@ void Settings::handle()
         {
             ArduinoSettings settings = ReadEeprom();
             settings.sensorSettings.EnableSensorCURR = getValue(command, ',', 2).toInt() == 1 ? true : false;
-            settings.sensorSettings.EnableSensorVFAS = getValue(command, ',', 3).toInt() == 1 ? true : false;
-            settings.sensorSettings.EnableSensorFuel = getValue(command, ',', 4).toInt() == 1 ? true : false;
-            settings.sensorSettings.EnableSensorA3 = getValue(command, ',', 5).toInt() == 1 ? true : false;
-            settings.sensorSettings.EnableSensorA4 = getValue(command, ',', 6).toInt() == 1 ? true : false;
-            // settings.sensorSettings.AmpsPerPoint = getValue(command, ',', 7).toFloat();
-            settings.sensorSettings.CurrVoltageRef = getValue(command, ',', 7).toFloat();
-            settings.sensorSettings.CurrSensitivity = getValue(command, ',', 8).toFloat();
-            settings.sensorSettings.CurrOffset = getValue(command, ',', 9).toFloat();
-            settings.sensorSettings.VoltsPerPoint = getValue(command, ',', 10).toFloat();
+            settings.sensorSettings.CurrSensorPin = getValue(command, ',', 3).toInt();
+            settings.sensorSettings.EnableSensorVFAS = getValue(command, ',', 4).toInt() == 1 ? true : false;
+            settings.sensorSettings.VfasSensorPin = getValue(command, ',', 5).toInt();
+            settings.sensorSettings.EnableSensorFuel = getValue(command, ',', 6).toInt() == 1 ? true : false;
+            settings.sensorSettings.EnableSensorA3 = getValue(command, ',', 7).toInt() == 1 ? true : false;
+            settings.sensorSettings.A3SensorPin = getValue(command, ',', 8).toInt();
+            settings.sensorSettings.EnableSensorA4 = getValue(command, ',', 9).toInt() == 1 ? true : false;
+            settings.sensorSettings.A4SensorPin = getValue(command, ',', 10).toInt();
+            settings.sensorSettings.CurrVoltageRef = getValue(command, ',', 11).toFloat();
+            settings.sensorSettings.CurrSensitivity = getValue(command, ',', 12).toFloat();
+            settings.sensorSettings.CurrOffset = getValue(command, ',', 13).toFloat();
+            settings.sensorSettings.VoltsPerPoint = getValue(command, ',', 14).toFloat();
             WriteEeprom(settings);
             Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
+                << settings.sensorSettings.CurrSensorPin << ","
                 << settings.sensorSettings.EnableSensorVFAS << ","
+                << settings.sensorSettings.VfasSensorPin << ","
                 << settings.sensorSettings.EnableSensorFuel << ","
                 << settings.sensorSettings.EnableSensorA3 << ","
+                << settings.sensorSettings.A3SensorPin << ","
                 << settings.sensorSettings.EnableSensorA4 << ","
+                << settings.sensorSettings.A4SensorPin << ","
                 // << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
                 << _FLOAT(settings.sensorSettings.CurrVoltageRef, 6) << ","
                 << _FLOAT(settings.sensorSettings.CurrSensitivity, 6) << ","
@@ -214,3 +255,22 @@ String Settings::getValue(String data, char separator, int index)
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 #endif
+
+void Settings::Reset()
+{
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
+    Preferences settingsPreferences;
+    settingsPreferences.begin(WIFI_STORAGE_SPACE, false);
+    settingsPreferences.clear();
+    settingsPreferences.end();
+    settingsPreferences.begin(SPORT_STORAGE_SPACE, false);
+    settingsPreferences.clear();
+    settingsPreferences.end();
+    settingsPreferences.begin(SENSORS_STORAGE_SPACE, false);
+    settingsPreferences.clear();
+    settingsPreferences.end();
+#else
+    EEPROM.write(0x00, 0xFF);
+    Serial << "RESET,OK" << endl;
+#endif
+}

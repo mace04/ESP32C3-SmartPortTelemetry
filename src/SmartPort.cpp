@@ -11,13 +11,13 @@ SmartPort::SmartPort()
 
 }
 
-void SmartPort::Begin(uint8_t rxPin, uint8_t txPin, bool inverted){
+void SmartPort::Begin(){
   settings = Settings::GetSmartPortSettings();
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
-  smartPort->begin(settings.BaudRate, SERIAL_8N1, rxPin, txPin, inverted);
+  smartPort->begin(settings.BaudRate, SERIAL_8N1, settings.RxPin, settings.TxPin, settings.Inverted);
 #else
-  smartPort = new SoftwareSerial(13, 13, true); //Always inverted Serial comm for Soft Serial
-  if(rxPin == txPin) softwarePin = rxPin;
+  smartPort = new SoftwareSerial(settings.RxPin, settings.TxPin, settings.Inverted); //Always inverted Serial comm for Soft Serial
+  if(settings.RxPin == settings.TxPin) softwarePin = settings.RxPin;
   Serial.println(settings.BaudRate);
   smartPort->begin(settings.BaudRate);
   pinMode(softwarePin, INPUT);

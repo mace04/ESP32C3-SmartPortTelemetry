@@ -34,8 +34,11 @@
 
 struct SmartPortSettings
 {
-    unsigned int BaudRate;
-    unsigned int RefreshRate;
+    unsigned int BaudRate = SPORT_BAUD; // Not to be changed. Always use default
+    unsigned int RefreshRate = SPORT_REFRESH_RATE;
+    uint8_t RxPin = 13; //Defaulted for Arduino
+    uint8_t TxPin = 13; //Defaulted for Arduino
+    bool Inverted = false;
 };
 
 struct SensorSettings
@@ -45,6 +48,10 @@ struct SensorSettings
     bool EnableSensorA3 = false;
     bool EnableSensorA4 = false;
     bool EnableSensorFuel = false;
+    uint8_t CurrSensorPin;
+    uint8_t VfasSensorPin;
+    uint8_t A3SensorPin;
+    uint8_t A4SensorPin;
     // double AmpsPerPoint;    // In milliAmps
     double CurrVoltageRef;
     double CurrSensitivity;
@@ -75,6 +82,7 @@ class Settings
         static void SetSmartPortSettings(SmartPortSettings settings);
         static SensorSettings GetSensorSettings();
         static void SetSensorSettings(SensorSettings settings);
+        static void Reset();
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
         static WiFiSettings GetWiFiSettings();
         static void SetWiFiSettings(WiFiSettings settings);
