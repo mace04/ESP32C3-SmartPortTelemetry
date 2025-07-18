@@ -32,6 +32,9 @@ Reference to other projects and information:
     AsyncWebServer server(80);
     String httpParamsHandle(const String &param);
     void httpPostAction(AsyncWebServerRequest *request);
+#else
+    static String input = "";
+    String ReadLineFromSerialNonBlocking();
 #endif
 SmartPort smartPort;
 bool wifiConnected = true;
@@ -40,6 +43,7 @@ bool wifiConnected = true;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(SERIAL_BAUD);
+  Serial.println(F("Initialising..."));
 
 //   Serial.println("Reseting memory.");
 //   Settings::Reset();
@@ -147,7 +151,7 @@ void setup() {
   // Register sensors
   smartPort.Begin();
 
-  Serial.println("Initialise Completed...");
+  Serial.println(F("Initialise Completed..."));
 }
 
 long int timer;
@@ -159,7 +163,15 @@ void loop() {
     ArduinoOTA.handle();
   }
 #else
-  Settings::handle();
+  String command = ReadLineFromSerialNonBlocking();
+//   if(command.length() > 0)
+//   {
+//     Serial.print(F("Command: "));
+//     Serial.println(command);
+//   }
+    // Handle the command
+  Settings::handle(command);
+  command == "";
 #endif
   // put your main code here, to run repeatedly:
   smartPort.Hanlde();
@@ -414,5 +426,24 @@ void httpPostAction(AsyncWebServerRequest *request)
         Settings::SetSmartPortSettings(spSettings);
 
     request->send(SPIFFS, "/index.html", String(), false, httpParamsHandle);
+}
+#else
+// Non-blocking serial line reader for Settings class
+// Call repeatedly in loop() or a task. Returns "" if line not complete.
+String ReadLineFromSerialNonBlocking()
+{
+    while (Serial.available()) {
+        char c = Serial.read();
+        if (c == '\n' || c == '\r') {
+            if (input.length() > 0) {
+                String result = input;
+                input = "";
+                return result;
+        }
+        } else {
+            input += c;
+        }
+    }
+    return "";
 }
 #endif
