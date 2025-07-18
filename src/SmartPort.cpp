@@ -50,52 +50,52 @@ void SmartPort::RegisterSensor(uint16_t sensorId)
     case FRSKY_VALUE_TYPE_ALT:
       altData.isRegistered = sensors->IsRegistered(SENSOR_ALT);
       altData.sensorId = FRSKY_VALUE_TYPE_ALT;
-      if(altData.isRegistered) Serial.println("Sensor Registered: ALT");
+      if(altData.isRegistered) Serial.println(F("Sensor Registered: ALT"));
       break;
     case FRSKY_VALUE_TYPE_CURR:
       currData.isRegistered = sensors->IsRegistered(SENSOR_CURR);
       currData.sensorId = FRSKY_VALUE_TYPE_CURR;
-      if(currData.isRegistered) Serial.println("Sensor Registered: CURR");
+      if(currData.isRegistered) Serial.println(F("Sensor Registered: CURR"));
       break;
     case FRSKY_VALUE_TYPE_VFAS:
       vfasData.isRegistered = sensors->IsRegistered(SENSOR_VFAS);
       vfasData.sensorId = FRSKY_VALUE_TYPE_VFAS;
-      if(vfasData.isRegistered) Serial.println("Sensor Registered: VFAS");
+      if(vfasData.isRegistered) Serial.println(F("Sensor Registered: VFAS"));
       break;
     case FRSKY_VALUE_TYPE_FUEL:
       fuelData.isRegistered = sensors->IsRegistered(SENSOR_FUEL);
       fuelData.sensorId = FRSKY_VALUE_TYPE_FUEL;
-      if(fuelData.isRegistered) Serial.println("Sensor Registered: FUEL");
+      if(fuelData.isRegistered) Serial.println(F("Sensor Registered: FUEL"));
       break;
     case FRSKY_VALUE_TYPE_GPS_LONG_LATI:
       gpsPosData.isRegistered = sensors->IsRegistered(SENSOR_GPS_LONG_LATI);
       gpsPosData.sensorId = FRSKY_VALUE_TYPE_GPS_LONG_LATI;
-      if(gpsPosData.isRegistered) Serial.println("Sensor Registered: GPS_LONG_LATI");
+      if(gpsPosData.isRegistered) Serial.println(F("Sensor Registered: GPS_LONG_LATI"));
       break;
     case FRSKY_VALUE_TYPE_GPS_ALT:
       gpsAltData.isRegistered = sensors->IsRegistered(SENSOR_GPS_ALT);
       gpsAltData.sensorId = FRSKY_VALUE_TYPE_GPS_ALT;
-      if(gpsAltData.isRegistered) Serial.println("Sensor Registered: GPS_ALT");
+      if(gpsAltData.isRegistered) Serial.println(F("Sensor Registered: GPS_ALT"));
       break;
     case FRSKY_VALUE_TYPE_GPS_SPEED:
       gpsSpeedData.isRegistered = sensors->IsRegistered(SENSOR_GPS_SPEED);
       gpsSpeedData.sensorId = FRSKY_VALUE_TYPE_GPS_SPEED;
-      if(gpsSpeedData.isRegistered) Serial.println("Sensor Registered: GPS_SPEED");
+      if(gpsSpeedData.isRegistered) Serial.println(F("Sensor Registered: GPS_SPEED"));
       break;
     case FRSKY_VALUE_TYPE_A3:
       a3Data.isRegistered = sensors->IsRegistered(SENSOR_A3);
       a3Data.sensorId = FRSKY_VALUE_TYPE_A3;
-      if(a3Data.isRegistered) Serial.println("Sensor Registered: A3");
+      if(a3Data.isRegistered) Serial.println(F("Sensor Registered: A3"));
       break;
     case FRSKY_VALUE_TYPE_A4:
       a4Data.isRegistered = sensors->IsRegistered(SENSOR_A4);
       a4Data.sensorId = FRSKY_VALUE_TYPE_A4;
-      if(a4Data.isRegistered) Serial.println("Sensor Registered: A4");
+      if(a4Data.isRegistered) Serial.println(F("Sensor Registered: A4"));
       break;
     case FRSKY_VALUE_TYPE_AIR_SPEED:
       airSpeedData.isRegistered = sensors->IsRegistered(SENSOR_AIR_SPEED);
       airSpeedData.sensorId = FRSKY_VALUE_TYPE_AIR_SPEED;
-      if(airSpeedData.isRegistered) Serial.println("Sensor Registered: AIR_SPEED");
+      if(airSpeedData.isRegistered) Serial.println(F("Sensor Registered: AIR_SPEED"));
       break;
     default:
       break;
@@ -224,13 +224,11 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
             if (sensorPolling0x22Loop % 2 == 0 && millis() - currData.lastSent > settings.RefreshRate && currData.isRegistered)
             {
               SetSensorValue(FRSKY_VALUE_TYPE_CURR, sensors->ReadSensor(SENSOR_CURR) * 100);
-              // TelePlot::Plot("CURR Interval:", millis() - currData.lastSent);
               this->SendData(currData);
             }
             if (sensorPolling0x22Loop % 2 == 1 && millis() - vfasData.lastSent > settings.RefreshRate && vfasData.isRegistered) 
             {
               SetSensorValue(FRSKY_VALUE_TYPE_VFAS, sensors->ReadSensor(SENSOR_VFAS) * 100);
-              // TelePlot::Plot("VFAS Interval:", millis() - vfasData.lastSent);
               this->SendData(vfasData);
             }
           break;
@@ -244,13 +242,11 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
           if (millis() - a3Data.lastSent > settings.RefreshRate && a3Data.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_A3, sensors->ReadSensor(SENSOR_A3));
-            // TelePlot::Plot("A3 Interval:", millis() - a3Data.lastSent);
             this->SendData(a3Data);
           }
           if (millis() - a4Data.lastSent > settings.RefreshRate && a4Data.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_A4, sensors->ReadSensor(SENSOR_A4));
-            // TelePlot::Plot("A4 Interval:", millis() - a4Data.lastSent);
             this->SendData(a4Data);
           }
           break;
@@ -258,7 +254,6 @@ void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
           if (millis() - fuelData.lastSent > settings.RefreshRate && fuelData.isRegistered) 
           {
             SetSensorValue(FRSKY_VALUE_TYPE_FUEL, sensors->ReadSensor(SENSOR_FUEL));
-            // TelePlot::Plot("FUEL Interval:", millis() - fuelData.lastSent);
             this->SendData(fuelData);
           }
           break;
@@ -326,7 +321,6 @@ void SmartPort::SendData(SmartPortFrame& data)
   for(int i = 0; i < 8; i++)
     this->SendByte(frame[i]);
   data.lastSent = millis();
-  // TelePlot::Plot("SPORT Packet Interval:", millis() - lastPacketSent);
   lastPacketSent = millis();
 #if !defined(ARDUINO_XIAO_ESP32C3) && !defined(ESP32)
   if(softwarePin > 0)
