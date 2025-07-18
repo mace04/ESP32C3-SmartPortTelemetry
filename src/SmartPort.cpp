@@ -211,6 +211,15 @@ void SmartPort::SetSensorValue(uint16_t sensorId, uint32_t value)
 
 void SmartPort::Hanlde() //TODO Serial feedback for SmartPort telemetry values
 {
+  static unsigned long lastSettingsUpdate = 0;
+  unsigned long now = millis();
+
+  // Update settings every 5 seconds
+  if (now - lastSettingsUpdate >= 5000) {
+    settings = Settings::GetSmartPortSettings();
+    lastSettingsUpdate = now;
+  }
+
   // ReadSensors();
   if (smartPort->available() > 0)
   {
