@@ -164,12 +164,7 @@ void loop() {
   }
 #else
   String command = ReadLineFromSerialNonBlocking();
-//   if(command.length() > 0)
-//   {
-//     Serial.print(F("Command: "));
-//     Serial.println(command);
-//   }
-    // Handle the command
+  // Handle the command
   Settings::handle(command);
   command == "";
 #endif
