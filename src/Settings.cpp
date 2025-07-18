@@ -169,15 +169,15 @@ void Settings::handle(const String& command)
     if(command.length() > 0)
     {
         // Serial.setTimeout(50);
-        if(getValue(command, ',', 0).equalsIgnoreCase("GET"))
+        if(getValue(command, ' ', 0).equalsIgnoreCase("GET"))
         {
             PrintSettings();
         }
-        else if(getValue(command, ',', 0).equalsIgnoreCase("SET") )
+        else if(getValue(command, ' ', 0).equalsIgnoreCase("SET") )
         {
-            SetSettingByName(getValue(command, ',', 1), getValue(command, ',', 2));
+            SetSettingByName(getValue(command, ' ', 1), getValue(command, ' ', 2));
         }
-        else if(getValue(command, ',', 0).equalsIgnoreCase("RESET"))
+        else if(getValue(command, ' ', 0).equalsIgnoreCase("RESET"))
         {
             Reset();
         }
@@ -298,9 +298,11 @@ void Settings::SetSettingByName(const String& settingName, const String& value)
 
     if (sensorChanged) {
         SetSensorSettings(sensor);
+        Serial.println(F("OK"));
     }
     if (spChanged) {
         SetSmartPortSettings(sp);
+        Serial.println(F("OK"));
     }
 }
 #endif
