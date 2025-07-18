@@ -26,6 +26,12 @@
 #define SENSOR_A4             0x0910
 #define SENSOR_AIR_SPEED      0x0a00
 
+#if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
+    #define ADC_MAX_VALUE 4095.00
+#else   
+    #define ADC_MAX_VALUE 1023.00
+#endif 
+
 
 class Sensors
 {

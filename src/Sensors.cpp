@@ -205,7 +205,7 @@ float Sensors::GetCurrent() {
         // Read the raw ADC sample values from the ACS758_PIN
         int raw_adc = val / SAMPLE_RATES;
         // Convert the raw ADC value to voltage in millivolts
-        float voltage = raw_adc * (Settings::GetSensorSettings().CurrVoltageRef / 4095.0);
+        float voltage = raw_adc * (Settings::GetSensorSettings().CurrVoltageRef / ADC_MAX_VALUE);
         // Calculate the current based on the voltage and the sensor's sensitivity and zero-current voltage output
         retval = (voltage - Settings::GetSensorSettings().CurrOffset)/ Settings::GetSensorSettings().CurrSensitivity;  
 
