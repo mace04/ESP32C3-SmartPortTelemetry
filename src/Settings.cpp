@@ -164,76 +164,22 @@ void Settings::WriteEeprom(ArduinoSettings settings)
     EEPROM.put(0x00, settings);
 }
 
-void Settings::handle()
+void Settings::handle(const String& command)
 {
-    if(Serial.available())
+    if(command.length() > 0)
     {
         // Serial.setTimeout(50);
-        String command = Serial.readStringUntil('\n');
-        Serial << ":" << command << ":" << endl;
-        if(command.startsWith("GET"))
+        if(getValue(command, ',', 0).equalsIgnoreCase("GET"))
         {
-            ArduinoSettings settings = ReadEeprom();
-            Serial << "SMARTPORT," << settings.smartPortSettings.BaudRate << "," << settings.smartPortSettings.RefreshRate << endl;
-            Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
-                << settings.sensorSettings.CurrSensorPin << ","
-                << settings.sensorSettings.EnableSensorVFAS << ","
-                << settings.sensorSettings.VfasSensorPin << ","
-                << settings.sensorSettings.EnableSensorFuel << ","
-                << settings.sensorSettings.EnableSensorA3 << ","
-                << settings.sensorSettings.A3SensorPin << ","
-                << settings.sensorSettings.EnableSensorA4 << ","
-                << settings.sensorSettings.A4SensorPin << ","
-                // << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
-                << _FLOAT(settings.sensorSettings.CurrVoltageRef, 6) << ","
-                << _FLOAT(settings.sensorSettings.CurrSensitivity, 6) << ","
-                << _FLOAT(settings.sensorSettings.CurrOffset, 6) << ","
-                << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;
+            PrintSettings();
         }
-        else if(command.startsWith("SET,SMARTPORT"))
+        else if(getValue(command, ',', 0).equalsIgnoreCase("SET") )
         {
-            ArduinoSettings settings = ReadEeprom();
-            settings.smartPortSettings.BaudRate = getValue(command, ',', 2).toInt();
-            settings.smartPortSettings.RefreshRate = getValue(command, ',', 3).toInt();
-            WriteEeprom(settings);
-            Serial << "SMARTPORT," << settings.smartPortSettings.BaudRate << "," << settings.smartPortSettings.RefreshRate << endl;
+            SetSettingByName(getValue(command, ',', 1), getValue(command, ',', 2));
         }
-        else if(command.startsWith("SET,SENSORS"))
+        else if(getValue(command, ',', 0).equalsIgnoreCase("RESET"))
         {
-            ArduinoSettings settings = ReadEeprom();
-            settings.sensorSettings.EnableSensorCURR = getValue(command, ',', 2).toInt() == 1 ? true : false;
-            settings.sensorSettings.CurrSensorPin = getValue(command, ',', 3).toInt();
-            settings.sensorSettings.EnableSensorVFAS = getValue(command, ',', 4).toInt() == 1 ? true : false;
-            settings.sensorSettings.VfasSensorPin = getValue(command, ',', 5).toInt();
-            settings.sensorSettings.EnableSensorFuel = getValue(command, ',', 6).toInt() == 1 ? true : false;
-            settings.sensorSettings.EnableSensorA3 = getValue(command, ',', 7).toInt() == 1 ? true : false;
-            settings.sensorSettings.A3SensorPin = getValue(command, ',', 8).toInt();
-            settings.sensorSettings.EnableSensorA4 = getValue(command, ',', 9).toInt() == 1 ? true : false;
-            settings.sensorSettings.A4SensorPin = getValue(command, ',', 10).toInt();
-            settings.sensorSettings.CurrVoltageRef = getValue(command, ',', 11).toFloat();
-            settings.sensorSettings.CurrSensitivity = getValue(command, ',', 12).toFloat();
-            settings.sensorSettings.CurrOffset = getValue(command, ',', 13).toFloat();
-            settings.sensorSettings.VoltsPerPoint = getValue(command, ',', 14).toFloat();
-            WriteEeprom(settings);
-            Serial << "SENSORS," << settings.sensorSettings.EnableSensorCURR << "," 
-                << settings.sensorSettings.CurrSensorPin << ","
-                << settings.sensorSettings.EnableSensorVFAS << ","
-                << settings.sensorSettings.VfasSensorPin << ","
-                << settings.sensorSettings.EnableSensorFuel << ","
-                << settings.sensorSettings.EnableSensorA3 << ","
-                << settings.sensorSettings.A3SensorPin << ","
-                << settings.sensorSettings.EnableSensorA4 << ","
-                << settings.sensorSettings.A4SensorPin << ","
-                // << _FLOAT(settings.sensorSettings.AmpsPerPoint, 6) << ","
-                << _FLOAT(settings.sensorSettings.CurrVoltageRef, 6) << ","
-                << _FLOAT(settings.sensorSettings.CurrSensitivity, 6) << ","
-                << _FLOAT(settings.sensorSettings.CurrOffset, 6) << ","
-                << _FLOAT(settings.sensorSettings.VoltsPerPoint, 6) << endl;        
-        }
-        else if(command.startsWith("RESET"))
-        {
-            EEPROM.write(0x00, 0xFF);
-            Serial << "RESET,OK" << endl;
+            Reset();
         }
         
     }
@@ -254,6 +200,109 @@ String Settings::getValue(String data, char separator, int index)
     }
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+
+void Settings::PrintSettings()
+{
+    SensorSettings sensor = GetSensorSettings();
+    SmartPortSettings sp = GetSmartPortSettings();
+
+    Serial.println(F("=== Sensor Settings ==="));
+    Serial.print(F("EnableSensorCURR: ")); Serial.println(sensor.EnableSensorCURR ? "true" : "false");
+    Serial.print(F("CurrSensorPin: ")); Serial.println(sensor.CurrSensorPin);
+    Serial.print(F("EnableSensorVFAS: ")); Serial.println(sensor.EnableSensorVFAS ? "true" : "false");
+    Serial.print(F("VfasSensorPin: ")); Serial.println(sensor.VfasSensorPin);
+    Serial.print(F("EnableSensorFuel: ")); Serial.println(sensor.EnableSensorFuel ? "true" : "false");
+    Serial.print(F("EnableSensorA3: ")); Serial.println(sensor.EnableSensorA3 ? "true" : "false");
+    Serial.print(F("A3SensorPin: ")); Serial.println(sensor.A3SensorPin);
+    Serial.print(F("EnableSensorA4: ")); Serial.println(sensor.EnableSensorA4 ? "true" : "false");
+    Serial.print(F("A4SensorPin: ")); Serial.println(sensor.A4SensorPin);
+    Serial.print(F("VoltsPerPoint: ")); Serial.println(sensor.VoltsPerPoint, 4);
+    Serial.print(F("CurrVoltageRef: ")); Serial.println(sensor.CurrVoltageRef, 4);
+    Serial.print(F("CurrSensitivity: ")); Serial.println(sensor.CurrSensitivity, 4);
+    Serial.print(F("CurrOffset: ")); Serial.println(sensor.CurrOffset, 4);
+
+    Serial.println(F("=== SmartPort Settings ==="));
+    Serial.print(F("BaudRate: ")); Serial.println(sp.BaudRate);
+    Serial.print(F("RxPin: ")); Serial.println(sp.RxPin);
+    Serial.print(F("TxPin: ")); Serial.println(sp.TxPin);
+    Serial.print(F("RefreshRate: ")); Serial.println(sp.RefreshRate);
+    Serial.print(F("Inverted: ")); Serial.println(sp.Inverted ? "true" : "false");
+}
+
+void Settings::SetSettingByName(const String& settingName, const String& value)
+{
+    bool sensorChanged = false;
+    bool spChanged = false;
+
+    SensorSettings sensor = GetSensorSettings();
+    SmartPortSettings sp = GetSmartPortSettings();
+
+    // SensorSettings
+    if (settingName == "EnableSensorCURR") {
+        sensor.EnableSensorCURR = (value == "1" || value.equalsIgnoreCase("true"));
+        sensorChanged = true;
+    } else if (settingName == "CurrSensorPin") {
+        sensor.CurrSensorPin = value.toInt();
+        sensorChanged = true;
+    } else if (settingName == "EnableSensorVFAS") {
+        sensor.EnableSensorVFAS = (value == "1" || value.equalsIgnoreCase("true"));
+        sensorChanged = true;
+    } else if (settingName == "VfasSensorPin") {
+        sensor.VfasSensorPin = value.toInt();
+        sensorChanged = true;
+    } else if (settingName == "EnableSensorFuel") {
+        sensor.EnableSensorFuel = (value == "1" || value.equalsIgnoreCase("true"));
+        sensorChanged = true;
+    } else if (settingName == "EnableSensorA3") {
+        sensor.EnableSensorA3 = (value == "1" || value.equalsIgnoreCase("true"));
+        sensorChanged = true;
+    } else if (settingName == "A3SensorPin") {
+        sensor.A3SensorPin = value.toInt();
+        sensorChanged = true;
+    } else if (settingName == "EnableSensorA4") {
+        sensor.EnableSensorA4 = (value == "1" || value.equalsIgnoreCase("true"));
+        sensorChanged = true;
+    } else if (settingName == "A4SensorPin") {
+        sensor.A4SensorPin = value.toInt();
+        sensorChanged = true;
+    } else if (settingName == "VoltsPerPoint") {
+        sensor.VoltsPerPoint = value.toFloat();
+        sensorChanged = true;
+    } else if (settingName == "CurrVoltageRef") {
+        sensor.CurrVoltageRef = value.toFloat();
+        sensorChanged = true;
+    } else if (settingName == "CurrSensitivity") {
+        sensor.CurrSensitivity = value.toFloat();
+        sensorChanged = true;
+    } else if (settingName == "CurrOffset") {
+        sensor.CurrOffset = value.toFloat();
+        sensorChanged = true;
+    }
+    // SmartPortSettings
+    else if (settingName == "BaudRate") {
+        sp.BaudRate = value.toInt();
+        spChanged = true;
+    } else if (settingName == "RxPin") {
+        sp.RxPin = value.toInt();
+        spChanged = true;
+    } else if (settingName == "TxPin") {
+        sp.TxPin = value.toInt();
+        spChanged = true;
+    } else if (settingName == "RefreshRate") {
+        sp.RefreshRate = value.toInt();
+        spChanged = true;
+    } else if (settingName == "Inverted") {
+        sp.Inverted = (value == "1" || value.equalsIgnoreCase("true"));
+        spChanged = true;
+    }
+
+    if (sensorChanged) {
+        SetSensorSettings(sensor);
+    }
+    if (spChanged) {
+        SetSmartPortSettings(sp);
+    }
+}
 #endif
 
 void Settings::Reset()
@@ -271,6 +320,6 @@ void Settings::Reset()
     settingsPreferences.end();
 #else
     EEPROM.write(0x00, 0xFF);
-    Serial << "RESET,OK" << endl;
+    Serial.println(F("RESET,OK"));
 #endif
 }
