@@ -227,6 +227,10 @@ void Settings::PrintSettings()
     Serial.print(F("TxPin: ")); Serial.println(sp.TxPin);
     Serial.print(F("RefreshRate: ")); Serial.println(sp.RefreshRate);
     Serial.print(F("Inverted: ")); Serial.println(sp.Inverted ? "true" : "false");
+
+    Serial.println(F("=== MAX Values ==="));
+    Serial.print(F("Max Voltage: ")); Serial.println(sensor.VoltsPerPoint / 1000.00 * ADC_MAX_VALUE, 2);
+    Serial.print(F("Max Current: ")); Serial.println((sensor.CurrVoltageRef - sensor.CurrOffset) / (sensor.CurrSensitivity/1000.00), 2);
 }
 
 void Settings::SetSettingByName(const String& settingName, const String& value)
@@ -238,60 +242,60 @@ void Settings::SetSettingByName(const String& settingName, const String& value)
     SmartPortSettings sp = GetSmartPortSettings();
 
     // SensorSettings
-    if (settingName == "EnableSensorCURR") {
+    if (settingName.equalsIgnoreCase("EnableSensorCURR")) {
         sensor.EnableSensorCURR = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName == "CurrSensorPin") {
+    } else if (settingName.equalsIgnoreCase("CurrSensorPin")) {
         sensor.CurrSensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName == "EnableSensorVFAS") {
+    } else if (settingName.equalsIgnoreCase("EnableSensorVFAS")) {
         sensor.EnableSensorVFAS = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName == "VfasSensorPin") {
+    } else if (settingName.equalsIgnoreCase("VfasSensorPin")) {
         sensor.VfasSensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName == "EnableSensorFuel") {
+    } else if (settingName.equalsIgnoreCase("EnableSensorFuel")) {
         sensor.EnableSensorFuel = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName == "EnableSensorA3") {
+    } else if (settingName.equalsIgnoreCase("EnableSensorA3")) {
         sensor.EnableSensorA3 = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName == "A3SensorPin") {
+    } else if (settingName.equalsIgnoreCase("A3SensorPin")) {
         sensor.A3SensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName == "EnableSensorA4") {
+    } else if (settingName.equalsIgnoreCase("EnableSensorA4")) {
         sensor.EnableSensorA4 = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName == "A4SensorPin") {
+    } else if (settingName.equalsIgnoreCase("A4SensorPin")) {
         sensor.A4SensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName == "VoltsPerPoint") {
+    } else if (settingName.equalsIgnoreCase("VoltsPerPoint")) {
         sensor.VoltsPerPoint = value.toFloat();
         sensorChanged = true;
-    } else if (settingName == "CurrVoltageRef") {
+    } else if (settingName.equalsIgnoreCase("CurrVoltageRef")) {
         sensor.CurrVoltageRef = value.toFloat();
         sensorChanged = true;
-    } else if (settingName == "CurrSensitivity") {
+    } else if (settingName.equalsIgnoreCase("CurrSensitivity")) {
         sensor.CurrSensitivity = value.toFloat();
         sensorChanged = true;
-    } else if (settingName == "CurrOffset") {
+    } else if (settingName.equalsIgnoreCase("CurrOffset")) {
         sensor.CurrOffset = value.toFloat();
         sensorChanged = true;
     }
     // SmartPortSettings
-    else if (settingName == "BaudRate") {
+    else if (settingName.equalsIgnoreCase("BaudRate")) {
         sp.BaudRate = value.toInt();
         spChanged = true;
-    } else if (settingName == "RxPin") {
+    } else if (settingName.equalsIgnoreCase("RxPin")) {
         sp.RxPin = value.toInt();
         spChanged = true;
-    } else if (settingName == "TxPin") {
+    } else if (settingName.equalsIgnoreCase("TxPin")) {
         sp.TxPin = value.toInt();
         spChanged = true;
-    } else if (settingName == "RefreshRate") {
+    } else if (settingName.equalsIgnoreCase("RefreshRate")) {
         sp.RefreshRate = value.toInt();
         spChanged = true;
-    } else if (settingName == "Inverted") {
+    } else if (settingName.equalsIgnoreCase("Inverted")) {
         sp.Inverted = (value == "1" || value.equalsIgnoreCase("true"));
         spChanged = true;
     }

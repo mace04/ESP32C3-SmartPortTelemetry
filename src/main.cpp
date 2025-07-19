@@ -264,7 +264,7 @@ String httpParamsHandle(const String &param)
     if (param == "maxAmps")
     {
         char ptr[8];
-        dtostrf((Settings::GetSensorSettings().CurrVoltageRef - Settings::GetSensorSettings().CurrOffset) / Settings::GetSensorSettings().CurrSensitivity, 6, 2, ptr);
+        dtostrf((Settings::GetSensorSettings().CurrVoltageRef - Settings::GetSensorSettings().CurrOffset) / (Settings::GetSensorSettings().CurrSensitivity / 1000.00), 6, 2, ptr);
         return String(ptr);
     }
     if (param == "smartportRxPin")
