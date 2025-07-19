@@ -193,14 +193,14 @@ float Sensors::GetCurrent() {
         val = SAMPLE_RATES * curretTestValue++;
 #endif // _TEST_VALUES_
     // Calculate tolerancde of +-2 points. if within tolerance use previous reading
-        if(val/SAMPLE_RATES > lastReadings.curr + (2) || val/SAMPLE_RATES < lastReadings.curr - (2))
-        {
-            lastReadings.curr = val / SAMPLE_RATES;
-        }
-        else
-        {
-            val = lastReadings.curr * SAMPLE_RATES;
-        }
+        // if(val/SAMPLE_RATES > lastReadings.curr + (2) || val/SAMPLE_RATES < lastReadings.curr - (2))
+        // {
+        //     lastReadings.curr = val / SAMPLE_RATES;
+        // }
+        // else
+        // {
+        //     val = lastReadings.curr * SAMPLE_RATES;
+        // }
 
         // Read the raw ADC sample values from the ACS758_PIN
         int raw_adc = val / SAMPLE_RATES;
@@ -261,14 +261,14 @@ float Sensors::GetVoltage(int pin) {
         previousValue = lastReadings.vfas;
     }
     // Calculate tolerancde of +-2 points. if within tolerance use previous reading
-    if(val/SAMPLE_RATES > previousValue + (2) || val/SAMPLE_RATES < previousValue - (2))
-    {
-        lastReadings.vfas = val / SAMPLE_RATES;
-    }
-    else
-    {
-        val = lastReadings.vfas * SAMPLE_RATES;
-    }
+    // if(val/SAMPLE_RATES > previousValue + (2) || val/SAMPLE_RATES < previousValue - (2))
+    // {
+    //     lastReadings.vfas = val / SAMPLE_RATES;
+    // }
+    // else
+    // {
+    //     val = lastReadings.vfas * SAMPLE_RATES;
+    // }
 
     float retval = ((float)val / (float) SAMPLE_RATES) * vpp / 1000.00  ;
 
