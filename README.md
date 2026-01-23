@@ -1,4 +1,4 @@
-# ESP32C3 SmartPort Telemetry Hub
+# SmartPort Telemetry Hub
 
 This is an ESP32C3 SmartPort Telemetry Hub project designed to interface with FrSky RC telemetry systems. It acts as a sensor hub that sends telemetry data to FrSky receivers using the SmartPort protocol.
 
