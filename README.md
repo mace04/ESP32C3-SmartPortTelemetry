@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # ESP32C3 SmartPort Telemetry Hub
+=======
+# SmartPort Telemetry Hub
+>>>>>>> 31949bdac84a91d608b6a1ad5d17dac5fbdecbc5
 
 This is an ESP32C3 SmartPort Telemetry Hub project designed to interface with FrSky RC telemetry systems. It acts as a sensor hub that sends telemetry data to FrSky receivers using the SmartPort protocol.
 
@@ -50,4 +54,8 @@ This is an ESP32C3 SmartPort Telemetry Hub project designed to interface with Fr
 - **Modular Architecture**: Separate classes for sensors, SmartPort communication, and settings management
 - **Library Dependencies**: SparkFun BMP180, ESP Async WebServer, Streaming (for Arduino)
 
+<<<<<<< HEAD
 This project transforms microcontroller boards into dedicated telemetry sensors for RC aircraft, providing comprehensive flight data to FrSky-compatible transmitters and receivers.
+=======
+This project transforms microcontroller boards into dedicated telemetry sensors for RC aircraft, providing comprehensive flight data to FrSky-compatible transmitters and receivers.
+>>>>>>> 31949bdac84a91d608b6a1ad5d17dac5fbdecbc5
