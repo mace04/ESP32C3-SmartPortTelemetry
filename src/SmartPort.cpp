@@ -18,7 +18,7 @@ void SmartPort::Begin(){
 #else
   smartPort = new SoftwareSerial(settings.RxPin, settings.TxPin, settings.Inverted); //Always inverted Serial comm for Soft Serial
   if(settings.RxPin == settings.TxPin) softwarePin = settings.RxPin;
-  Serial.println(settings.BaudRate);
+//   Serial.println(settings.BaudRate);
   smartPort->begin(settings.BaudRate);
   pinMode(softwarePin, INPUT);
   smartPort->listen();
@@ -50,52 +50,52 @@ void SmartPort::RegisterSensor(uint16_t sensorId)
     case FRSKY_VALUE_TYPE_ALT:
       altData.isRegistered = sensors->IsRegistered(SENSOR_ALT);
       altData.sensorId = FRSKY_VALUE_TYPE_ALT;
-      if(altData.isRegistered) Serial.println(F("Sensor Registered: ALT"));
+    //   if(altData.isRegistered) Serial.println(F("Sensor Registered: ALT"));
       break;
     case FRSKY_VALUE_TYPE_CURR:
       currData.isRegistered = sensors->IsRegistered(SENSOR_CURR);
       currData.sensorId = FRSKY_VALUE_TYPE_CURR;
-      if(currData.isRegistered) Serial.println(F("Sensor Registered: CURR"));
+    //   if(currData.isRegistered) Serial.println(F("Sensor Registered: CURR"));
       break;
     case FRSKY_VALUE_TYPE_VFAS:
       vfasData.isRegistered = sensors->IsRegistered(SENSOR_VFAS);
       vfasData.sensorId = FRSKY_VALUE_TYPE_VFAS;
-      if(vfasData.isRegistered) Serial.println(F("Sensor Registered: VFAS"));
+    //   if(vfasData.isRegistered) Serial.println(F("Sensor Registered: VFAS"));
       break;
     case FRSKY_VALUE_TYPE_FUEL:
       fuelData.isRegistered = sensors->IsRegistered(SENSOR_FUEL);
       fuelData.sensorId = FRSKY_VALUE_TYPE_FUEL;
-      if(fuelData.isRegistered) Serial.println(F("Sensor Registered: FUEL"));
+    //   if(fuelData.isRegistered) Serial.println(F("Sensor Registered: FUEL"));
       break;
     case FRSKY_VALUE_TYPE_GPS_LONG_LATI:
       gpsPosData.isRegistered = sensors->IsRegistered(SENSOR_GPS_LONG_LATI);
       gpsPosData.sensorId = FRSKY_VALUE_TYPE_GPS_LONG_LATI;
-      if(gpsPosData.isRegistered) Serial.println(F("Sensor Registered: GPS_LONG_LATI"));
+    //   if(gpsPosData.isRegistered) Serial.println(F("Sensor Registered: GPS_LONG_LATI"));
       break;
     case FRSKY_VALUE_TYPE_GPS_ALT:
       gpsAltData.isRegistered = sensors->IsRegistered(SENSOR_GPS_ALT);
       gpsAltData.sensorId = FRSKY_VALUE_TYPE_GPS_ALT;
-      if(gpsAltData.isRegistered) Serial.println(F("Sensor Registered: GPS_ALT"));
+    //   if(gpsAltData.isRegistered) Serial.println(F("Sensor Registered: GPS_ALT"));
       break;
     case FRSKY_VALUE_TYPE_GPS_SPEED:
       gpsSpeedData.isRegistered = sensors->IsRegistered(SENSOR_GPS_SPEED);
       gpsSpeedData.sensorId = FRSKY_VALUE_TYPE_GPS_SPEED;
-      if(gpsSpeedData.isRegistered) Serial.println(F("Sensor Registered: GPS_SPEED"));
+    //   if(gpsSpeedData.isRegistered) Serial.println(F("Sensor Registered: GPS_SPEED"));
       break;
     case FRSKY_VALUE_TYPE_A3:
       a3Data.isRegistered = sensors->IsRegistered(SENSOR_A3);
       a3Data.sensorId = FRSKY_VALUE_TYPE_A3;
-      if(a3Data.isRegistered) Serial.println(F("Sensor Registered: A3"));
+    //   if(a3Data.isRegistered) Serial.println(F("Sensor Registered: A3"));
       break;
     case FRSKY_VALUE_TYPE_A4:
       a4Data.isRegistered = sensors->IsRegistered(SENSOR_A4);
       a4Data.sensorId = FRSKY_VALUE_TYPE_A4;
-      if(a4Data.isRegistered) Serial.println(F("Sensor Registered: A4"));
+    //   if(a4Data.isRegistered) Serial.println(F("Sensor Registered: A4"));
       break;
     case FRSKY_VALUE_TYPE_AIR_SPEED:
       airSpeedData.isRegistered = sensors->IsRegistered(SENSOR_AIR_SPEED);
       airSpeedData.sensorId = FRSKY_VALUE_TYPE_AIR_SPEED;
-      if(airSpeedData.isRegistered) Serial.println(F("Sensor Registered: AIR_SPEED"));
+    //   if(airSpeedData.isRegistered) Serial.println(F("Sensor Registered: AIR_SPEED"));
       break;
     default:
       break;

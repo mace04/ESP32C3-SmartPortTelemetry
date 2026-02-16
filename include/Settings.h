@@ -7,7 +7,7 @@
     #include <Preferences.h>
 #else
     #include <EEPROM.h>
-    // #include <Streaming.h>
+    #include <Streaming.h>
 #endif
 
 // Sensor Default Configuration

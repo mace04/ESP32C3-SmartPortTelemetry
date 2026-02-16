@@ -26,7 +26,7 @@ Reference to other projects and information:
 #include <Settings.h>
 #include <SmartPort.h>
 
-#define SERIAL_BAUD 115200
+#define SERIAL_BAUD 38400
 
 #if defined(ARDUINO_XIAO_ESP32C3) || defined(ESP32)
     AsyncWebServer server(80);
@@ -38,12 +38,14 @@ Reference to other projects and information:
 #endif
 SmartPort smartPort;
 bool wifiConnected = true;
+
+
 // put function declarations here:
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(SERIAL_BAUD);
-  Serial.println(F("Initialising..."));
+//   Serial.println(F("Initialising..."));
 
 //   Serial.println("Reseting memory.");
 //   Settings::Reset();
@@ -151,7 +153,7 @@ void setup() {
   // Register sensors
   smartPort.Begin();
 
-  Serial.println(F("Initialise Completed..."));
+//   Serial.println(F("Initialise Completed..."));
 }
 
 long int timer;

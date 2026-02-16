@@ -206,31 +206,38 @@ void Settings::PrintSettings()
     SensorSettings sensor = GetSensorSettings();
     SmartPortSettings sp = GetSmartPortSettings();
 
-    Serial.println(F("=== Sensor Settings ==="));
-    Serial.print(F("EnableSensorCURR: ")); Serial.println(sensor.EnableSensorCURR ? "true" : "false");
-    Serial.print(F("CurrSensorPin: ")); Serial.println(sensor.CurrSensorPin);
-    Serial.print(F("EnableSensorVFAS: ")); Serial.println(sensor.EnableSensorVFAS ? "true" : "false");
-    Serial.print(F("VfasSensorPin: ")); Serial.println(sensor.VfasSensorPin);
-    Serial.print(F("EnableSensorFuel: ")); Serial.println(sensor.EnableSensorFuel ? "true" : "false");
-    Serial.print(F("EnableSensorA3: ")); Serial.println(sensor.EnableSensorA3 ? "true" : "false");
-    Serial.print(F("A3SensorPin: ")); Serial.println(sensor.A3SensorPin);
-    Serial.print(F("EnableSensorA4: ")); Serial.println(sensor.EnableSensorA4 ? "true" : "false");
-    Serial.print(F("A4SensorPin: ")); Serial.println(sensor.A4SensorPin);
-    Serial.print(F("VoltsPerPoint: ")); Serial.println(sensor.VoltsPerPoint, 4);
-    Serial.print(F("CurrVoltageRef: ")); Serial.println(sensor.CurrVoltageRef, 4);
-    Serial.print(F("CurrSensitivity: ")); Serial.println(sensor.CurrSensitivity, 4);
-    Serial.print(F("CurrOffset: ")); Serial.println(sensor.CurrOffset, 4);
+    Serial << F("{") << endl;
+    Serial << F("\t\"sensors\":") << endl;
+    Serial << F("\t{") << endl;
+    Serial << F("\t\t\"enableCURR\": ") << (sensor.EnableSensorCURR ? "true" : "false") << F(",") << endl;
+    Serial << F("\t\t\"currSensorPin\": ") << sensor.CurrSensorPin  << F(",") << endl;
+    Serial << F("\t\t\"enableVFAS\": ") << (sensor.EnableSensorVFAS ? "true" : "false") << F(",") << endl;
+    Serial << F("\t\t\"vfasSensorPin\": ") << sensor.VfasSensorPin << F(",") << endl;
+    Serial << F("\t\t\"enableFuel\": ") << (sensor.EnableSensorFuel ? "true" : "false") << F(",") << endl;
+    Serial << F("\t\t\"enableA3\": ") << (sensor.EnableSensorA3 ? "true" : "false") << F(",") << endl;
+    Serial << F("\t\t\"a3SensorPin\": ") << sensor.A3SensorPin << F(",") << endl;
+    Serial << F("\t\t\"enableA4\": ") << (sensor.EnableSensorA4 ? "true" : "false") << F(",") << endl;
+    Serial << F("\t\t\"a4SensorPin\": ") << sensor.A4SensorPin << F(",") << endl;
+    Serial << F("\t\t\"voltsPerPoint\": ") << sensor.VoltsPerPoint << F(",") << endl;
+    Serial << F("\t\t\"currVoltageRef\": ") << sensor.CurrVoltageRef << F(",") << endl;
+    Serial << F("\t\t\"currSensitivity\": ") << sensor.CurrSensitivity << F(",") << endl;
+    Serial << F("\t\t\"currOffset\": ") << sensor.CurrOffset << endl;
+    Serial << F("\t},") << endl;
 
-    Serial.println(F("=== SmartPort Settings ==="));
-    Serial.print(F("BaudRate: ")); Serial.println(sp.BaudRate);
-    Serial.print(F("RxPin: ")); Serial.println(sp.RxPin);
-    Serial.print(F("TxPin: ")); Serial.println(sp.TxPin);
-    Serial.print(F("RefreshRate: ")); Serial.println(sp.RefreshRate);
-    Serial.print(F("Inverted: ")); Serial.println(sp.Inverted ? "true" : "false");
+    Serial << F("\t\"smartport\":") << endl;
+    Serial << F("\t{") << endl;
+    Serial << F("\t\t\"baudRate\": ") << sp.BaudRate << F(",") << endl;
+    Serial << F("\t\t\"rxPin\": ") << sp.RxPin << F(",") << endl;
+    Serial << F("\t\t\"txPin\": ") << sp.TxPin << F(",") << endl;
+    Serial << F("\t\t\"refreshRate\": ") << sp.RefreshRate << F(",") << endl;
+    Serial << F("\t\t\"inverted\": ") << (sp.Inverted ? "true" : "false") << endl;
+    Serial << F("\t},") << endl;
 
-    Serial.println(F("=== MAX Values ==="));
-    Serial.print(F("Max Voltage: ")); Serial.println(sensor.VoltsPerPoint / 1000.00 * ADC_MAX_VALUE, 2);
-    Serial.print(F("Max Current: ")); Serial.println((sensor.CurrVoltageRef - sensor.CurrOffset) / (sensor.CurrSensitivity/1000.00), 2);
+    // Serial.println(F("=== MAX Values ==="));
+    Serial << F("\t\"maxVoltage\": ") << (sensor.VoltsPerPoint / 1000.00 * ADC_MAX_VALUE) << F(",") << endl;
+    Serial << F("\t\"maxCurrent\": ") << ((sensor.CurrVoltageRef - sensor.CurrOffset) / (sensor.CurrSensitivity / 1000.00)) << endl;
+    Serial << F("}") << endl;
+    Serial.flush();
 }
 
 void Settings::SetSettingByName(const String& settingName, const String& value)
@@ -242,72 +249,71 @@ void Settings::SetSettingByName(const String& settingName, const String& value)
     SmartPortSettings sp = GetSmartPortSettings();
 
     // SensorSettings
-    if (settingName.equalsIgnoreCase("EnableSensorCURR")) {
+    if (settingName.equalsIgnoreCase("enableCURR")) {
         sensor.EnableSensorCURR = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("CurrSensorPin")) {
+    } else if (settingName.equalsIgnoreCase("currSensorPin")) {
         sensor.CurrSensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("EnableSensorVFAS")) {
+    } else if (settingName.equalsIgnoreCase("enableVFAS")) {
         sensor.EnableSensorVFAS = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("VfasSensorPin")) {
+    } else if (settingName.equalsIgnoreCase("vfasSensorPin")) {
         sensor.VfasSensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("EnableSensorFuel")) {
+    } else if (settingName.equalsIgnoreCase("enableFuel")) {
         sensor.EnableSensorFuel = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("EnableSensorA3")) {
+    } else if (settingName.equalsIgnoreCase("enableA3")) {
         sensor.EnableSensorA3 = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("A3SensorPin")) {
+    } else if (settingName.equalsIgnoreCase("a3SensorPin")) {
         sensor.A3SensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("EnableSensorA4")) {
+    } else if (settingName.equalsIgnoreCase("enableA4")) {
         sensor.EnableSensorA4 = (value == "1" || value.equalsIgnoreCase("true"));
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("A4SensorPin")) {
+    } else if (settingName.equalsIgnoreCase("a4SensorPin")) {
         sensor.A4SensorPin = value.toInt();
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("VoltsPerPoint")) {
+    } else if (settingName.equalsIgnoreCase("voltsPerPoint")) {
         sensor.VoltsPerPoint = value.toFloat();
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("CurrVoltageRef")) {
+    } else if (settingName.equalsIgnoreCase("currVoltageRef")) {
         sensor.CurrVoltageRef = value.toFloat();
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("CurrSensitivity")) {
+    } else if (settingName.equalsIgnoreCase("currSensitivity")) {
         sensor.CurrSensitivity = value.toFloat();
         sensorChanged = true;
-    } else if (settingName.equalsIgnoreCase("CurrOffset")) {
+    } else if (settingName.equalsIgnoreCase("currOffset")) {
         sensor.CurrOffset = value.toFloat();
         sensorChanged = true;
     }
     // SmartPortSettings
-    else if (settingName.equalsIgnoreCase("BaudRate")) {
+    else if (settingName.equalsIgnoreCase("baudRate")) {
         sp.BaudRate = value.toInt();
         spChanged = true;
-    } else if (settingName.equalsIgnoreCase("RxPin")) {
+    } else if (settingName.equalsIgnoreCase("rxPin")) {
         sp.RxPin = value.toInt();
         spChanged = true;
-    } else if (settingName.equalsIgnoreCase("TxPin")) {
+    } else if (settingName.equalsIgnoreCase("txPin")) {
         sp.TxPin = value.toInt();
         spChanged = true;
-    } else if (settingName.equalsIgnoreCase("RefreshRate")) {
+    } else if (settingName.equalsIgnoreCase("refreshRate")) {
         sp.RefreshRate = value.toInt();
         spChanged = true;
-    } else if (settingName.equalsIgnoreCase("Inverted")) {
+    } else if (settingName.equalsIgnoreCase("inverted")) {
         sp.Inverted = (value == "1" || value.equalsIgnoreCase("true"));
         spChanged = true;
     }
 
     if (sensorChanged) {
         SetSensorSettings(sensor);
-        Serial.println(F("OK"));
     }
     if (spChanged) {
         SetSmartPortSettings(sp);
-        Serial.println(F("OK"));
     }
+    // Serial << F("{ \"success\": true }") << endl;
 }
 #endif
 
