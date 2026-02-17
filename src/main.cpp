@@ -410,7 +410,7 @@ void httpPostAction(AsyncWebServerRequest *request)
         }
         if (p->name() == "smartReverseSignal")
         {
-            spSettings.Inverted = p->value().toInt();
+            spSettings.Inverted = (p->value() == "1" || p->value().equalsIgnoreCase("true") || p->value().equalsIgnoreCase("checked"));
             isSmartportSettings = true;
         }
 

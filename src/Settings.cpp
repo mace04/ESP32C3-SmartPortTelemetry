@@ -11,6 +11,7 @@ SmartPortSettings Settings::GetSmartPortSettings()
     settings.RefreshRate = settingsPreferences.getUInt("refreshRate", SPORT_REFRESH_RATE);
     settings.RxPin = settingsPreferences.getUInt("rxPin");
     settings.TxPin = settingsPreferences.getUInt("txPin");
+    settings.Inverted = settingsPreferences.getBool("inverted", false);
     settingsPreferences.end();
 #else
     settings = ReadEeprom().smartPortSettings;
@@ -29,6 +30,7 @@ void Settings::SetSmartPortSettings(SmartPortSettings settings)
     settingsPreferences.putUInt("refreshRate", settings.RefreshRate);
     settingsPreferences.putUInt("rxPin", settings.RxPin);
     settingsPreferences.putUInt("txPin", settings.TxPin);
+    settingsPreferences.putBool("inverted", settings.Inverted);
     settingsPreferences.end();
 #else
     ArduinoSettings fullSettings = ReadEeprom();
